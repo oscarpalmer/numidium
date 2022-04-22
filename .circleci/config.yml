@@ -1,0 +1,14 @@
+version: 2.1
+orbs:
+  codecov: codecov/codecov@3.2.2
+jobs:
+  build:
+    docker:
+      - image: cimg/php:8.1
+    steps:
+      - checkout
+      - run: sudo pecl install pcov
+      - run: composer install -n --prefer-dist
+      - run: XDEBUG_MODE=coverage ./vendor/bin/phpunit --coverage-clover coverage.xml
+      - codecov/upload:
+          file: coverage.xml
