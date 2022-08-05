@@ -9,15 +9,15 @@ use PHPUnit\Framework\TestCase;
 
 class NumidiumTest extends TestCase
 {
-    public function testConstructor(): void
-    {
-        $numidium = new Numidium;
+	public function testConstructor(): void
+	{
+		$numidium = new Numidium;
 
-        $this->assertInstanceOf('oscarpalmer\Numidium\Numidium', $numidium);
-    }
+		$this->assertInstanceOf('oscarpalmer\Numidium\Numidium', $numidium);
+	}
 
-    public function testVersion(): void
-    {
-        $this->assertIsString(Numidium::VERSION);
-    }
+	public function testVersion(): void
+	{
+		$this->assertIsString(Numidium::VERSION);
+	}
 }

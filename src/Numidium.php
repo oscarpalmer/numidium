@@ -6,5 +6,5 @@ namespace oscarpalmer\Numidium;
 
 class Numidium
 {
-    public const VERSION = '0.1.0';
+	public const VERSION = '0.1.0';
 }
