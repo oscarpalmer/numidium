@@ -27,8 +27,15 @@
 		"nyholm/psr7-server": "^1.0"
 	},
 	"require-dev": {
+		"nunomaduro/phpinsights": "^2.4",
+		"phpstan/phpstan": "^1.8",
 		"phpunit/php-code-coverage": ">=9.2",
 		"phpunit/phpunit": ">=9.5"
 	},
-	"type": "library"
+	"type": "library",
+	"config": {
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		}
+	}
 }
