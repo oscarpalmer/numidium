@@ -15,9 +15,9 @@ trait Response
 	private readonly mixed $callback;
 	private readonly int $status;
 
-	public function respond(ServerRequestInterface $request, mixed $parameter): ResponseInterface
+	public function respond(ServerRequestInterface $request, mixed $parameters): ResponseInterface
 	{
-		$response = $this->getResponse($request, $parameter);
+		$response = $this->getResponse($request, $parameters);
 
 		if ($response instanceof ResponseInterface) {
 			return $response;
@@ -25,13 +25,13 @@ trait Response
 
 		return new Psr7Response($this->status, [
 			'content-type' => 'text/html; charset=utf-8',
-		], is_scalar($response) ? (string) $response : json_encode($response));
+		], $this->stringify($response));
 	}
 
-	private function getResponse(ServerRequestInterface $request, mixed $parameter): mixed
+	private function getResponse(ServerRequestInterface $request, mixed $parameters): mixed
 	{
 		if (is_callable($this->callback)) {
-			return call_user_func($this->callback, $request);
+			return call_user_func($this->callback, $request, $parameters);
 		}
 
 		if (! is_string($this->callback)) {
@@ -39,15 +39,15 @@ trait Response
 		}
 
 		if (! str_contains($this->callback, '->')) {
-			return $this->getInstancedResponse($this->callback, 'handle', $request, $parameter);
+			return $this->getInstancedResponse($this->callback, 'handle', $request, $parameters);
 		}
 
 		$parts = explode('->', $this->callback);
 
-		return $this->getInstancedResponse($parts[0], $parts[1], $request, $parameter);
+		return $this->getInstancedResponse($parts[0], $parts[1], $request, $parameters);
 	}
 
-	private function getInstancedResponse(string $class, string $method, ServerRequestInterface $request, mixed $parameter): mixed
+	private function getInstancedResponse(string $class, string $method, ServerRequestInterface $request, mixed $parameters): mixed
 	{
 		$instance = new $class();
 
@@ -55,6 +55,21 @@ trait Response
 			throw new LogicException();
 		}
 
-		return $instance->$method($request, $parameter);
+		return $instance->$method($request, $parameters);
+	}
+
+	private function stringify(mixed $response): string
+	{
+		if (is_scalar($response)) {
+			return (string) $response;
+		}
+
+		$encoded = json_encode($response);
+
+		if ($encoded === false) {
+			return '';
+		}
+
+		return $encoded;
 	}
 }

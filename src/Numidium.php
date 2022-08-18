@@ -14,7 +14,7 @@ use Throwable;
 
 final class Numidium implements RequestHandlerInterface
 {
-	public const VERSION = '0.4.0';
+	public const VERSION = '0.5.0';
 
 	private readonly Router $router;
 
@@ -41,12 +41,12 @@ final class Numidium implements RequestHandlerInterface
 
 	public function run(?ServerRequestInterface $request = null): void
 	{
-		// ob_start();
+		ob_start();
 
 		$request ??= $this->createRequest();
 		$response = $this->handle($request);
 
-		// ob_end_clean();
+		ob_end_clean();
 
 		$this->sendResponse($response);
 	}
@@ -68,7 +68,7 @@ final class Numidium implements RequestHandlerInterface
 		}
 
 		if (! is_null($length)) {
-			// header(sprintf('content-length: %s', $length));
+			header(sprintf('content-length: %s', $length));
 		}
 	}
 

@@ -6,6 +6,7 @@ namespace oscarpalmer\Numidium\Routing;
 
 use Nyholm\Psr7\Response;
 use oscarpalmer\Numidium\Routing\Item\Error;
+use oscarpalmer\Numidium\Routing\Item\Parameters;
 use oscarpalmer\Numidium\Routing\Item\Route;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -67,8 +68,8 @@ final class Router
 		$path = $this->getPath($request);
 
 		foreach ($this->routes[$method] as $route) {
-			if ($path === $route->getPath()) {
-				return $route->respond($request, null);
+			if (preg_match($route->getExpression(), $path, $matches)) {
+				return $route->respond($request, new Parameters($route->getPath(), $matches));
 			}
 		}
 

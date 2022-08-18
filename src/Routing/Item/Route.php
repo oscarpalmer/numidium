@@ -8,14 +8,19 @@ final class Route
 {
 	use Response;
 
+	private const EXPRESSION_PATTERNS = ['/\A\/*/', '/\/*\z/', '/\//', '/\./', '/\((.*?)\)/', '/\*/', '/#([\w-]+)/', '/:([\w-]+)/'];
+	private const EXPRESSION_REPLACEMENTS = ['/', '/?', '\/', '\.', '(?:\\1)?', '(.*?)', '(\d+)',  '([\w-]+)'];
+
 	private readonly int $status;
 
-	/**
-	 * @param array<string>|string|callable $callback
-	 */
 	public function __construct(private readonly string $path, private readonly mixed $callback)
 	{
 		$this->status = 200;
+	}
+
+	public function getExpression(): string
+	{
+		return sprintf('/\A%s\z/', preg_replace(self::EXPRESSION_PATTERNS, self::EXPRESSION_REPLACEMENTS, $this->path));
 	}
 
 	public function getPath(): string
