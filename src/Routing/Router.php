@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace oscarpalmer\Numidium\Routing;
 
 use Nyholm\Psr7\Response;
+use oscarpalmer\Numidium\Routing\Item\Error;
+use oscarpalmer\Numidium\Routing\Item\Route;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
@@ -12,12 +14,12 @@ use Throwable;
 final class Router
 {
 	/**
-	 * @var array<callable>
+	 * @var array<Error>
 	 */
 	private array $errors = [];
 
 	/**
-	 * @var array<array<mixed>>
+	 * @var array<array<Route>>
 	 */
 	private array $routes = [
 		'DElETE' => [],
@@ -29,33 +31,29 @@ final class Router
 		'PUT' => [],
 	];
 
-	public function addError(int $status, callable $callback): void
+	public function addError(int $status, string|callable $callback): void
 	{
-		$this->errors[$status] = $callback;
+		$this->errors[$status] = new Error($status, $callback);
 	}
 
-	public function addRoute(string $method, string $path, callable $callback): void
+	public function addRoute(string $method, string $path, string|callable $callback): void
 	{
-		$this->routes[$method][] = [$path, $callback];
+		$this->routes[$method][] = new Route($path, $callback);
 	}
 
 	public function getError(int $status, ServerRequestInterface $request, ?Throwable $throwable = null): ResponseInterface
 	{
-		if (! isset($this->errors[$status])) {
-			$response = new Response($status);
-
-			$response->getBody()->write("{$status} {$response->getReasonPhrase()}");
-
-			return $response;
+		if (isset($this->errors[$status])) {
+			return $this->errors[$status]->respond($request, $throwable);
 		}
 
-		$response = call_user_func($this->errors[$status], $request, $throwable);
+		$response = new Response($status, [
+			'content-type' => 'text/html; charset=utf-8',
+		]);
 
-		if ($response instanceof ResponseInterface) {
-			return $response;
-		}
+		$response->getBody()->write(sprintf('%s %s<br><br>%s', $status, $response->getReasonPhrase(), $throwable));
 
-		return new Response($status, [], (string) $response);
+		return $response;
 	}
 
 	public function getRoutes(): Routes
@@ -69,17 +67,9 @@ final class Router
 		$path = $this->getPath($request);
 
 		foreach ($this->routes[$method] as $route) {
-			if ($path !== $route[0]) {
-				continue;
+			if ($path === $route->getPath()) {
+				return $route->respond($request, null);
 			}
-
-			$response = call_user_func($route[1], $request);
-
-			if ($response instanceof ResponseInterface) {
-				return $response;
-			}
-
-			return new Response(200, [], (string) $response);
 		}
 
 		return $this->getError(in_array($method, ['GET', 'HEAD']) ? 404 : 405, $request);

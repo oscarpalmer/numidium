@@ -10,21 +10,21 @@ final class Routes
 	{
 	}
 
-	public function delete(string $path, callable $callback): Routes
+	public function delete(string $path, string|callable $callback): Routes
 	{
 		$this->router->addRoute('DELETE', $path, $callback);
 
 		return $this;
 	}
 
-	public function error(int $status, callable $callback): Routes
+	public function error(int $status, string|callable $callback): Routes
 	{
 		$this->router->addError($status, $callback);
 
 		return $this;
 	}
 
-	public function get(string $path, callable $callback): Routes
+	public function get(string $path, string|callable $callback): Routes
 	{
 		$this->router->addRoute('GET', $path, $callback);
 		$this->router->addRoute('HEAD', $path, $callback);
@@ -32,28 +32,28 @@ final class Routes
 		return $this;
 	}
 
-	public function head(string $path, callable $callback): Routes
+	public function head(string $path, string|callable $callback): Routes
 	{
 		$this->router->addRoute('HEAD', $path, $callback);
 
 		return $this;
 	}
 
-	public function patch(string $path, callable $callback): Routes
+	public function patch(string $path, string|callable $callback): Routes
 	{
 		$this->router->addRoute('PATCH', $path, $callback);
 
 		return $this;
 	}
 
-	public function post(string $path, callable $callback): Routes
+	public function post(string $path, string|callable $callback): Routes
 	{
 		$this->router->addRoute('POST', $path, $callback);
 
 		return $this;
 	}
 
-	public function put(string $path, callable $callback): Routes
+	public function put(string $path, string|callable $callback): Routes
 	{
 		$this->router->addRoute('PUT', $path, $callback);
 
