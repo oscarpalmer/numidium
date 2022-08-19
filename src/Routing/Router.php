@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace oscarpalmer\Numidium\Routing;
 
-use Nyholm\Psr7\Response;
+use Nyholm\Psr7\Response as Psr17Response;
+use oscarpalmer\Numidium\Exception\Response as ExceptionResponse;
 use oscarpalmer\Numidium\Routing\Item\Error;
 use oscarpalmer\Numidium\Routing\Item\Parameters;
 use oscarpalmer\Numidium\Routing\Item\Route;
@@ -48,7 +49,7 @@ final class Router
 			return $this->errors[$status]->respond($request, $throwable);
 		}
 
-		$response = new Response($status, [
+		$response = new Psr17Response($status, [
 			'content-type' => 'text/html; charset=utf-8',
 		]);
 
@@ -69,7 +70,7 @@ final class Router
 
 		foreach ($this->routes[$method] as $route) {
 			if (preg_match($route->getExpression(), $path, $matches)) {
-				return $route->respond($request, new Parameters($route->getPath(), $matches));
+				throw new ExceptionResponse($route->respond($request, new Parameters($route->getPath(), $matches)));
 			}
 		}
 

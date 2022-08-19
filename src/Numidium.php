@@ -6,6 +6,7 @@ namespace oscarpalmer\Numidium;
 
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7Server\ServerRequestCreator;
+use oscarpalmer\Numidium\Exception\Response;
 use oscarpalmer\Numidium\Routing\Router;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -14,7 +15,7 @@ use Throwable;
 
 final class Numidium implements RequestHandlerInterface
 {
-	public const VERSION = '0.6.0';
+	public const VERSION = '0.7.0';
 
 	private readonly Router $router;
 
@@ -27,6 +28,8 @@ final class Numidium implements RequestHandlerInterface
 	{
 		try {
 			return $this->router->run($request);
+		} catch (Response $exception) {
+			return $exception->getResponse();
 		} catch (Throwable $throwable) {
 			return $this->router->getError(500, $request, $throwable);
 		}
