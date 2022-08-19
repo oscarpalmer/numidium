@@ -15,7 +15,7 @@ use Throwable;
 
 final class Numidium implements RequestHandlerInterface
 {
-	public const VERSION = '0.7.0';
+	public const VERSION = '0.8.0';
 
 	private readonly Router $router;
 
@@ -29,9 +29,9 @@ final class Numidium implements RequestHandlerInterface
 		try {
 			return $this->router->run($request);
 		} catch (Response $exception) {
-			return $exception->getResponse();
+			return $exception->getResponse()->withProtocolVersion($request->getProtocolVersion());
 		} catch (Throwable $throwable) {
-			return $this->router->getError(500, $request, $throwable);
+			return $this->router->getError(500, $request, $throwable)->withProtocolVersion($request->getProtocolVersion());
 		}
 	}
 
@@ -44,12 +44,12 @@ final class Numidium implements RequestHandlerInterface
 
 	public function run(?ServerRequestInterface $request = null): void
 	{
-		ob_start();
+		// ob_start();
 
 		$request ??= $this->createRequest();
 		$response = $this->handle($request);
 
-		ob_end_clean();
+		// ob_end_clean();
 
 		$this->sendResponse($response);
 	}
@@ -64,6 +64,8 @@ final class Numidium implements RequestHandlerInterface
 
 	private function sendHeaders(ResponseInterface $response, int|null $length): void
 	{
+		header(sprintf('HTTP/%s %s %s', $response->getProtocolVersion(), $response->getStatusCode(), $response->getReasonPhrase()), true);
+
 		foreach ($response->getHeaders() as $name => $values) {
 			foreach ($values as $value) {
 				header(sprintf('%s: %s', $name, $value), false);

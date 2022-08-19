@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace oscarpalmer\Numidium\Routing;
 
-use Nyholm\Psr7\Response as Psr17Response;
 use oscarpalmer\Numidium\Exception\Response as ExceptionResponse;
+use oscarpalmer\Numidium\Http\Response;
 use oscarpalmer\Numidium\Routing\Item\Error;
 use oscarpalmer\Numidium\Routing\Item\Parameters;
 use oscarpalmer\Numidium\Routing\Item\Route;
@@ -49,13 +49,13 @@ final class Router
 			return $this->errors[$status]->respond($request, $throwable);
 		}
 
-		$response = new Psr17Response($status, [
+		$response = Response::create($status, '', [
 			'content-type' => 'text/html; charset=utf-8',
 		]);
 
 		$response->getBody()->write(sprintf('%s %s<br><br>%s', $status, $response->getReasonPhrase(), $throwable));
 
-		return $response;
+		return $response->withProtocolVersion($request->getProtocolVersion());
 	}
 
 	public function getRoutes(): Routes

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace oscarpalmer\Numidium\Routing\Item;
 
 use LogicException;
-use Nyholm\Psr7\Response as Psr7Response;
+use oscarpalmer\Numidium\Http\Response as HttpResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -23,9 +23,9 @@ trait Response
 			return $response;
 		}
 
-		return new Psr7Response($this->status, [
+		return HttpResponse::create($this->status, $response, [
 			'content-type' => 'text/html; charset=utf-8',
-		], $this->stringify($response));
+		]);
 	}
 
 	private function getResponse(ServerRequestInterface $request, mixed $parameters): mixed
@@ -56,20 +56,5 @@ trait Response
 		}
 
 		return $instance->$method($request, $parameters);
-	}
-
-	private function stringify(mixed $response): string
-	{
-		if (is_scalar($response)) {
-			return (string) $response;
-		}
-
-		$encoded = json_encode($response);
-
-		if ($encoded === false) {
-			return '';
-		}
-
-		return $encoded;
 	}
 }
