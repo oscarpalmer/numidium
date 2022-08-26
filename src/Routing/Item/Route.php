@@ -20,7 +20,7 @@ final class Route
 
 	public function getExpression(): string
 	{
-		return sprintf('/\A%s\z/', preg_replace(self::EXPRESSION_PATTERNS, self::EXPRESSION_REPLACEMENTS, $this->path));
+		return sprintf('/\A%s\z/i', preg_replace(self::EXPRESSION_PATTERNS, self::EXPRESSION_REPLACEMENTS, $this->path));
 	}
 
 	public function getPath(): string

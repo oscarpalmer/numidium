@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace oscarpalmer\Numidium\Routing;
 
+use oscarpalmer\Numidium\Configuration;
 use oscarpalmer\Numidium\Exception\Response as ExceptionResponse;
 use oscarpalmer\Numidium\Http\Response;
 use oscarpalmer\Numidium\Routing\Item\Error;
@@ -33,6 +34,10 @@ final class Router
 		'PUT' => [],
 	];
 
+	public function __construct(private readonly Configuration $configuration)
+	{
+	}
+
 	public function addError(int $status, string|callable $callback): void
 	{
 		$this->errors[$status] = new Error($status, $callback);
@@ -40,7 +45,7 @@ final class Router
 
 	public function addRoute(string $method, string $path, string|callable $callback): void
 	{
-		$this->routes[$method][] = new Route($path, $callback);
+		$this->routes[$method][] = new Route($this->getRoutePath($path), $callback);
 	}
 
 	public function getError(int $status, ServerRequestInterface $request, ?Throwable $throwable = null): ResponseInterface
@@ -66,7 +71,7 @@ final class Router
 	public function run(ServerRequestInterface $request): ResponseInterface
 	{
 		$method = $request->getMethod();
-		$path = $this->getPath($request);
+		$path = $this->getRequestPath($request);
 
 		foreach ($this->routes[$method] as $route) {
 			if (preg_match($route->getExpression(), $path, $matches)) {
@@ -77,16 +82,27 @@ final class Router
 		return $this->getError(in_array($method, ['GET', 'HEAD']) ? 404 : 405, $request);
 	}
 
-	private function getPath(ServerRequestInterface $request): string
+	private function getRequestPath(ServerRequestInterface $request): string
 	{
 		$path = $request->getUri()->getPath();
 
-		if (mb_strlen($path) === 0) {
+		if (mb_strlen($path, 'utf-8') === 0) {
 			return '/';
 		}
 
-		$path = ltrim($path, '/');
+		return '/' . ltrim($path, '/');
+	}
 
-		return "/{$path}";
+	private function getRoutePath(string $path): string
+	{
+		$prefix = $this->configuration->getPathPrefix();
+
+		$path = '/' . ltrim($path, '/');
+
+		if (stripos($path, $prefix) === 0) {
+			return $path;
+		}
+
+		return $prefix . $path;
 	}
 }
