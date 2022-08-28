@@ -52,7 +52,7 @@ final class Router
 	public function getError(int $status, ServerRequestInterface $request, ?Throwable $throwable = null): ResponseInterface
 	{
 		if (isset($this->errors[$status])) {
-			return $this->errors[$status]->respond($request, $this->configuration, $throwable);
+			return $this->errors[$status]->prepare($this->configuration, $throwable)->handle($request);
 		}
 
 		$response = Response::create($status, '', $this->configuration->getDefaultHeaders());
@@ -73,11 +73,7 @@ final class Router
 
 		foreach ($this->routes[$method] as $route) {
 			if (preg_match($route->getExpression(), $path, $matches)) {
-				throw new ExceptionResponse($route->respond(
-					$request,
-					$this->configuration,
-					new Parameters($route->getPath(), $matches, $request->getQueryParams(), $request->getUri()->getFragment())
-				));
+				throw new ExceptionResponse($route->prepare($this->configuration, new Parameters($request, $route, $matches))->handle($request));
 			}
 		}
 

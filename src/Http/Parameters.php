@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace oscarpalmer\Numidium\Http;
 
+use oscarpalmer\Numidium\Routing\Item\Route;
+use Psr\Http\Message\ServerRequestInterface;
 use stdClass;
 
 final class Parameters
@@ -13,17 +15,18 @@ final class Parameters
 	private stdClass $query;
 
 	/**
-	 * @param array<string> $path
-	 * @param array<string> $query
+	 * @param array<string> $matches
 	 */
-	public function __construct(string $route, array $path, array $query, ?string $fragment = 'xyz')
+	public function __construct(ServerRequestInterface $request, Route $route, array $matches)
 	{
+		$fragment = $request->getUri()->getFragment();
+
 		if (is_string($fragment) && mb_strlen($fragment, 'utf-8') > 0) {
 			$this->fragment = $fragment;
 		}
 
-		$this->buildPath($route, $path);
-		$this->buildQuery($query);
+		$this->buildPath($route->getPath(), $matches);
+		$this->buildQuery($request->getQueryParams());
 	}
 
 	public function getFragment(): ?string

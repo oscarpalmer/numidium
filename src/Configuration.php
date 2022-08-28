@@ -53,11 +53,10 @@ final class Configuration
 	}
 
 	/**
-	 * @param mixed $headers
-	 *
 	 * @return array<string, string>
 	 */
-	private function getValidHeaders(mixed $headers): array {
+	private function getValidHeaders(mixed $headers): array
+	{
 		if (! is_array($headers)) {
 			throw new LogicException('');
 		}

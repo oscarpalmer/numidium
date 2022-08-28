@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace oscarpalmer\Numidium\Routing\Item;
 
 use Closure;
+use oscarpalmer\Numidium\Psr\RequestHandler;
 
-final class Error
+final class Error extends RequestHandler
 {
-	use Response;
-
-	public function __construct(private readonly int $status, private readonly string|Closure $callback)
+	public function __construct(int $status, string|Closure $callback)
 	{
+		parent::__construct($status, null, $callback);
 	}
 }

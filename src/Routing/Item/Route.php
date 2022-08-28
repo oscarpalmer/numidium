@@ -5,19 +5,16 @@ declare(strict_types=1);
 namespace oscarpalmer\Numidium\Routing\Item;
 
 use Closure;
+use oscarpalmer\Numidium\Psr\RequestHandler;
 
-final class Route
+final class Route extends RequestHandler
 {
-	use Response;
-
 	private const EXPRESSION_PATTERNS = ['/\A\/*/', '/\/*\z/', '/\//', '/\./', '/\((.*?)\)/', '/\*/', '/#([\w-]+)/', '/:([\w-]+)/'];
 	private const EXPRESSION_REPLACEMENTS = ['/', '/?', '\/', '\.', '(?:\\1)?', '(.*?)', '(\d+)',  '([\w-]+)'];
 
-	private readonly int $status;
-
-	public function __construct(private readonly string $path, private readonly string|Closure $callback)
+	public function __construct(string $path, string|Closure $callback)
 	{
-		$this->status = 200;
+		parent::__construct(200, $path, $callback);
 	}
 
 	public function getExpression(): string
