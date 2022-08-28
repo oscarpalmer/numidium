@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace oscarpalmer\Numidium;
 
+use Closure;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7Server\ServerRequestCreator;
 use oscarpalmer\Numidium\Exception\Response;
 use oscarpalmer\Numidium\Routing\Router;
+use oscarpalmer\Numidium\Routing\Routes;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -15,7 +17,7 @@ use Throwable;
 
 final class Numidium implements RequestHandlerInterface
 {
-	public const VERSION = '0.9.0';
+	public const VERSION = '0.10.0';
 
 	private Configuration $configuration;
 
@@ -38,9 +40,9 @@ final class Numidium implements RequestHandlerInterface
 		}
 	}
 
-	public function routes(callable $callback): Numidium
+	public function routes(Closure $callback): Numidium
 	{
-		call_user_func($callback, $this->router->getRoutes());
+		call_user_func($callback, new Routes($this->router));
 
 		return $this;
 	}

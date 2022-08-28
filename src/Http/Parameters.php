@@ -1,0 +1,108 @@
+<?php
+
+declare(strict_types=1);
+
+namespace oscarpalmer\Numidium\Http;
+
+use stdClass;
+
+final class Parameters
+{
+	private ?string $fragment;
+	private stdClass $path;
+	private stdClass $query;
+
+	/**
+	 * @param array<string> $path
+	 * @param array<string> $query
+	 */
+	public function __construct(string $route, array $path, array $query, ?string $fragment = 'xyz')
+	{
+		if (is_string($fragment) && mb_strlen($fragment, 'utf-8') > 0) {
+			$this->fragment = $fragment;
+		}
+
+		$this->buildPath($route, $path);
+		$this->buildQuery($query);
+	}
+
+	public function getFragment(): ?string
+	{
+		return $this->fragment;
+	}
+
+	public function getPath(): stdClass
+	{
+		return $this->path;
+	}
+
+	public function getQuery(): stdClass
+	{
+		return $this->query;
+	}
+
+	/**
+	 * @param array<string> $path
+	 */
+	private function buildPath(string $route, array $path): void
+	{
+		$this->path = new stdClass();
+
+		array_shift($path);
+
+		preg_match_all('/((?:#|:)[\w-]+|\*)/', $route, $keys);
+
+		foreach ($keys[0] as $index => $key) {
+			$this->setPathValue($key, $path[$index]);
+		}
+	}
+
+	/**
+	 * @param array<string|array<string>> $query
+	 */
+	private function buildQuery(array $query): void
+	{
+		$this->query = new stdClass();
+
+		foreach ($query as $key => $value) {
+			$this->query->{$key} = is_array($value)
+				? array_map(function ($item) {
+					return $this->getValue($item, true);
+				}, $value)
+				: $this->getValue($value, true);
+		}
+	}
+
+	private function getValue(string $value, bool $canBeBool): bool|int|string
+	{
+		if (preg_match('/\A\d+\z/', $value)) {
+			return (int) $value;
+		}
+
+		if ($canBeBool && preg_match('/\Afalse|true\z/i', $value)) {
+			return preg_match('/\Afalse\z/i', $value) ? false : true;
+		}
+
+		return $value;
+	}
+
+	private function setPathValue(string $key, string $value): void
+	{
+		$normalizedKey = ltrim($key, ':#');
+		$normalizedValue = $this->getValue($value, false);
+
+		if (! isset($this->path->{$normalizedKey})) {
+			$this->path->{$normalizedKey} = $normalizedValue;
+
+			return;
+		}
+
+		if (is_array($this->path->{$normalizedKey})) {
+			$this->path->{$normalizedKey}[] = $normalizedValue;
+
+			return;
+		}
+
+		$this->path->{$normalizedKey} = [$this->path->{$normalizedKey}, $normalizedValue];
+	}
+}

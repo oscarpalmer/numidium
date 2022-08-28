@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace oscarpalmer\Numidium\Routing;
 
+use Closure;
 use oscarpalmer\Numidium\Configuration;
 use oscarpalmer\Numidium\Exception\Response as ExceptionResponse;
+use oscarpalmer\Numidium\Http\Parameters;
 use oscarpalmer\Numidium\Http\Response;
 use oscarpalmer\Numidium\Routing\Item\Error;
-use oscarpalmer\Numidium\Routing\Item\Parameters;
 use oscarpalmer\Numidium\Routing\Item\Route;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -38,12 +39,12 @@ final class Router
 	{
 	}
 
-	public function addError(int $status, string|callable $callback): void
+	public function addError(int $status, string|Closure $callback): void
 	{
 		$this->errors[$status] = new Error($status, $callback);
 	}
 
-	public function addRoute(string $method, string $path, string|callable $callback): void
+	public function addRoute(string $method, string $path, string|Closure $callback): void
 	{
 		$this->routes[$method][] = new Route($this->getRoutePath($path), $callback);
 	}
@@ -51,21 +52,18 @@ final class Router
 	public function getError(int $status, ServerRequestInterface $request, ?Throwable $throwable = null): ResponseInterface
 	{
 		if (isset($this->errors[$status])) {
-			return $this->errors[$status]->respond($request, $throwable);
+			return $this->errors[$status]->respond($request, $this->configuration, $throwable);
 		}
 
-		$response = Response::create($status, '', [
-			'content-type' => 'text/html; charset=utf-8',
-		]);
+		$response = Response::create($status, '', $this->configuration->getDefaultHeaders());
 
-		$response->getBody()->write(sprintf('%s %s<br><br>%s', $status, $response->getReasonPhrase(), $throwable));
+		$template = is_null($throwable)
+			? '%s %s'
+			: '%s %s<br><br>%s';
+
+		$response->getBody()->write(sprintf($template, $status, $response->getReasonPhrase(), $throwable));
 
 		return $response->withProtocolVersion($request->getProtocolVersion());
-	}
-
-	public function getRoutes(): Routes
-	{
-		return new Routes($this);
 	}
 
 	public function run(ServerRequestInterface $request): ResponseInterface
@@ -75,7 +73,11 @@ final class Router
 
 		foreach ($this->routes[$method] as $route) {
 			if (preg_match($route->getExpression(), $path, $matches)) {
-				throw new ExceptionResponse($route->respond($request, new Parameters($route->getPath(), $matches)));
+				throw new ExceptionResponse($route->respond(
+					$request,
+					$this->configuration,
+					new Parameters($route->getPath(), $matches, $request->getQueryParams(), $request->getUri()->getFragment())
+				));
 			}
 		}
 

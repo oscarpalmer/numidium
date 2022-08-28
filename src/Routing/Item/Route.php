@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace oscarpalmer\Numidium\Routing\Item;
 
+use Closure;
+
 final class Route
 {
 	use Response;
@@ -13,7 +15,7 @@ final class Route
 
 	private readonly int $status;
 
-	public function __construct(private readonly string $path, private readonly mixed $callback)
+	public function __construct(private readonly string $path, private readonly string|Closure $callback)
 	{
 		$this->status = 200;
 	}

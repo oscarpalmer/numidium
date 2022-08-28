@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace oscarpalmer\Numidium\Routing\Item;
 
+use Closure;
+
 final class Error
 {
 	use Response;
 
-	/**
-	 * @param array<string>|string|callable $callback
-	 */
-	public function __construct(private readonly int $status, private readonly mixed $callback)
+	public function __construct(private readonly int $status, private readonly string|Closure $callback)
 	{
 	}
 }
