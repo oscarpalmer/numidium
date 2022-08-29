@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace oscarpalmer\Numidium\Psr;
 
 use Closure;
+use League\Container\Container;
 use LogicException;
 use oscarpalmer\Numidium\Configuration;
 use oscarpalmer\Numidium\Http\Response;
@@ -21,6 +22,8 @@ abstract class RequestHandler implements RequestHandlerInterface
 	protected readonly int $status;
 
 	private Configuration $configuration;
+
+	private Container $container;
 
 	private mixed $parameters;
 
@@ -42,9 +45,10 @@ abstract class RequestHandler implements RequestHandlerInterface
 		return Response::create($this->status, $response, $this->configuration->getDefaultHeaders());
 	}
 
-	public function prepare(Configuration $configuration, mixed $parameters): RequestHandlerInterface
+	public function prepare(Configuration $configuration, Container $container, mixed $parameters): RequestHandlerInterface
 	{
 		$this->configuration = $configuration;
+		$this->container = $container;
 		$this->parameters = $parameters;
 
 		return $this;
@@ -75,7 +79,9 @@ abstract class RequestHandler implements RequestHandlerInterface
 			throw new LogicException('');
 		}
 
-		$instance = new $class();
+		$instance = $this->container->has($class)
+			? $this->container->get($class)
+			: new $class();
 
 		if (is_null($method) && ! ($instance instanceof RequestHandlerInterface)) {
 			throw new LogicException('');

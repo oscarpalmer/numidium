@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace oscarpalmer\Numidium\Routing;
 
 use Closure;
+use League\Container\Container;
 use oscarpalmer\Numidium\Configuration;
 use oscarpalmer\Numidium\Exception\Response as ExceptionResponse;
 use oscarpalmer\Numidium\Http\Parameters;
@@ -35,7 +36,7 @@ final class Router
 		'PUT' => [],
 	];
 
-	public function __construct(private readonly Configuration $configuration)
+	public function __construct(private readonly Configuration $configuration, private readonly Container $container)
 	{
 	}
 
@@ -52,7 +53,7 @@ final class Router
 	public function getError(int $status, ServerRequestInterface $request, ?Throwable $throwable = null): ResponseInterface
 	{
 		if (isset($this->errors[$status])) {
-			return $this->errors[$status]->prepare($this->configuration, $throwable)->handle($request);
+			return $this->errors[$status]->prepare($this->configuration, $this->container, $throwable)->handle($request);
 		}
 
 		$response = Response::create($status, '', $this->configuration->getDefaultHeaders());
@@ -73,7 +74,7 @@ final class Router
 
 		foreach ($this->routes[$method] as $route) {
 			if (preg_match($route->getExpression(), $path, $matches)) {
-				throw new ExceptionResponse($route->prepare($this->configuration, new Parameters($request, $route, $matches))->handle($request));
+				throw new ExceptionResponse($route->prepare($this->configuration, $this->container, new Parameters($request, $route, $matches))->handle($request));
 			}
 		}
 

@@ -22,11 +22,12 @@
 	"license": "MIT",
 	"name": "oscarpalmer/numidium",
 	"require": {
-		"php": ">=8.1",
+		"friendsofphp/php-cs-fixer": "v3.9.5",
+		"league/container": "^4.2",
 		"nyholm/psr7": "^1.5",
 		"nyholm/psr7-server": "^1.0",
-		"psr/http-server-handler": "^1.0",
-		"friendsofphp/php-cs-fixer": "v3.9.5"
+		"php": ">=8.1",
+		"psr/http-server-handler": "^1.0"
 	},
 	"require-dev": {
 		"nunomaduro/phpinsights": "^2.4",

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace oscarpalmer\Numidium;
 
 use Closure;
+use League\Container\Container;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7Server\ServerRequestCreator;
 use oscarpalmer\Numidium\Exception\Response;
@@ -17,16 +18,27 @@ use Throwable;
 
 final class Numidium implements RequestHandlerInterface
 {
-	public const VERSION = '0.11.0';
+	public const VERSION = '0.12.0';
 
 	private Configuration $configuration;
 
+	private Container $container;
+
 	private Router $router;
 
-	public function __construct(?Configuration $configuration = null)
+	public function __construct(?Configuration $configuration = null, ?Container $container = null)
 	{
 		$this->configuration = $configuration ?? new Configuration();
-		$this->router = new Router($this->configuration);
+		$this->container = $container ?? new Container();
+
+		$this->router = new Router($this->configuration, $this->container);
+	}
+
+	public function dependencies(Closure $callback): Numidium
+	{
+		call_user_func($callback, new Dependencies($this->container));
+
+		return $this;
 	}
 
 	public function handle(ServerRequestInterface $request): ResponseInterface
