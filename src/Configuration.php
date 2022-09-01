@@ -12,15 +12,15 @@ final class Configuration
 	 * @var array<string, string>
 	 */
 	private array $validators = [
-		'defaultHeaders' => 'getValidHeaders',
-		'pathPrefix' => 'getValidPathPrefix',
+		'default_headers' => 'getValidHeaders',
+		'path_prefix' => 'getValidPathPrefix',
 	];
 
 	private array $values = [
-		'defaultHeaders' => [
+		'default_headers' => [
 			'content-type' => 'text/html; charset=utf-8',
 		],
-		'pathPrefix' => '',
+		'path_prefix' => '',
 	];
 
 	/**
@@ -44,12 +44,12 @@ final class Configuration
 	 */
 	public function getDefaultHeaders(): array
 	{
-		return $this->values['defaultHeaders'];
+		return $this->values['default_headers'];
 	}
 
 	public function getPathPrefix(): string
 	{
-		return (string) $this->values['pathPrefix'];
+		return $this->values['path_prefix'];
 	}
 
 	/**

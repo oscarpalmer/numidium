@@ -18,7 +18,7 @@ use Throwable;
 
 final class Numidium implements RequestHandlerInterface
 {
-	public const VERSION = '0.12.0';
+	public const VERSION = '0.13.0';
 
 	private Configuration $configuration;
 
@@ -26,6 +26,10 @@ final class Numidium implements RequestHandlerInterface
 
 	private Router $router;
 
+	/**
+	 * @param ?Configuration $configuration Optional configuration
+	 * @param ?Container $container Optional dependencies
+	 */
 	public function __construct(?Configuration $configuration = null, ?Container $container = null)
 	{
 		$this->configuration = $configuration ?? new Configuration();
@@ -34,6 +38,9 @@ final class Numidium implements RequestHandlerInterface
 		$this->router = new Router($this->configuration, $this->container);
 	}
 
+	/**
+	 * Add injectable dependencies for route callbacks
+	 */
 	public function dependencies(Closure $callback): Numidium
 	{
 		call_user_func($callback, new Dependencies($this->container));
@@ -41,6 +48,9 @@ final class Numidium implements RequestHandlerInterface
 		return $this;
 	}
 
+	/**
+	 * Create and return a response based on a HTTP request
+	 */
 	public function handle(ServerRequestInterface $request): ResponseInterface
 	{
 		try {
@@ -52,6 +62,9 @@ final class Numidium implements RequestHandlerInterface
 		}
 	}
 
+	/**
+	 * Add routes for responding to HTTP requests
+	 */
 	public function routes(Closure $callback): Numidium
 	{
 		call_user_func($callback, new Routes($this->router));
@@ -59,6 +72,9 @@ final class Numidium implements RequestHandlerInterface
 		return $this;
 	}
 
+	/**
+	 * Create and outout a response based on a HTTP request
+	 */
 	public function run(?ServerRequestInterface $request = null): void
 	{
 		ob_start();

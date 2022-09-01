@@ -19,6 +19,11 @@ final class Dependencies
 	{
 	}
 
+	/**
+	 * Add an array as a dependency
+	 *
+	 * @param array<mixed> $value
+	 */
 	public function array(string $name, array $value): Dependencies
 	{
 		$this->container->add($name, new ArrayArgument($value));
@@ -26,6 +31,9 @@ final class Dependencies
 		return $this;
 	}
 
+	/**
+	 * Add a boolean value as a dependency
+	 */
 	public function boolean(string $name, bool $value): Dependencies
 	{
 		$this->container->add($name, new BooleanArgument($value));
@@ -33,20 +41,34 @@ final class Dependencies
 		return $this;
 	}
 
-	public function callable(string $name, callable $value, string ...$arguments): Dependencies
+	/**
+	 * Add a callable as a dependency
+	 *
+	 * @param string $names Names of other dependencies to be used by callable
+	 */
+	public function callable(string $name, callable $value, string ...$names): Dependencies
 	{
-		$this->container->add($name, new CallableArgument($value))->addArguments($arguments);
+		$this->container->add($name, new CallableArgument($value))->addArguments($names);
 
 		return $this;
 	}
 
-	public function class(string $name, string ...$arguments): Dependencies
+	/**
+	 * Add a class as a dependency
+	 *
+	 * @param string $name Name of class, e.g. MyClass::class
+	 * @param string $names Names of other dependencies to be injected in constructor
+	 */
+	public function class(string $name, string ...$names): Dependencies
 	{
-		$this->container->add($name)->addArguments($arguments);
+		$this->container->add($name)->addArguments($names);
 
 		return $this;
 	}
 
+	/**
+	 * Add a float as a dependency
+	 */
 	public function float(string $name, float $value): Dependencies
 	{
 		$this->container->add($name, new FloatArgument($value));
@@ -54,13 +76,9 @@ final class Dependencies
 		return $this;
 	}
 
-	public function instance(string $name, string ...$arguments): Dependencies
-	{
-		$this->container->add($name)->addArguments($arguments);
-
-		return $this;
-	}
-
+	/**
+	 * Add an integer as a dependency
+	 */
 	public function integer(string $name, int $value): Dependencies
 	{
 		$this->container->add($name, new IntegerArgument($value));
@@ -68,6 +86,9 @@ final class Dependencies
 		return $this;
 	}
 
+	/**
+	 * Add a number - float or integer - as a dependency
+	 */
 	public function number(string $name, int|float $value): Dependencies
 	{
 		return is_float($value)
@@ -75,6 +96,9 @@ final class Dependencies
 			: $this->integer($name, $value);
 	}
 
+	/**
+	 * Add an object as a dependency
+	 */
 	public function object(string $name, object $value): Dependencies
 	{
 		$this->container->add($name, new ObjectArgument($value));
@@ -82,6 +106,9 @@ final class Dependencies
 		return $this;
 	}
 
+	/**
+	 * Add a string as a dependency
+	 */
 	public function string(string $name, string $value): Dependencies
 	{
 		$this->container->add($name, new StringArgument($value));

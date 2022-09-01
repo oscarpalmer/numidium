@@ -7,42 +7,40 @@ namespace oscarpalmer\Numidium\Psr;
 use Closure;
 use League\Container\Container;
 use LogicException;
+use Nyholm\Psr7\Response;
 use oscarpalmer\Numidium\Configuration;
-use oscarpalmer\Numidium\Http\Response;
+use oscarpalmer\Numidium\Routing\Item\Basic;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\StreamInterface;
+use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-abstract class RequestHandler implements RequestHandlerInterface
+final class RequestHandler implements RequestHandlerInterface
 {
-	protected readonly string|Closure $callback;
-
-	protected readonly string $path;
-
-	protected readonly int $status;
-
 	private Configuration $configuration;
 
 	private Container $container;
 
+	/**
+	 * @var array<string|Closure>
+	 */
+	private array $middleware;
+
 	private mixed $parameters;
 
-	public function __construct(int $status, ?string $path, string|Closure $callback)
+	public function __construct(private readonly Basic $item)
 	{
-		$this->callback = $callback;
-		$this->path = $path ?? '';
-		$this->status = $status;
+		$this->middleware = $item->getMiddleware();
 	}
 
 	public function handle(ServerRequestInterface $request): ResponseInterface
 	{
-		$response = $this->getResponse($request);
-
-		if ($response instanceof ResponseInterface) {
-			return $response;
+		if (count($this->middleware) > 0) {
+			return $this->getResponse('middleware', $request, array_shift($this->middleware));
 		}
 
-		return Response::create($this->status, $response, $this->configuration->getDefaultHeaders());
+		return $this->getResponse('response', $request, $this->item->getCallback());
 	}
 
 	public function prepare(Configuration $configuration, Container $container, mixed $parameters): RequestHandlerInterface
@@ -54,26 +52,26 @@ abstract class RequestHandler implements RequestHandlerInterface
 		return $this;
 	}
 
-	private function getResponse(ServerRequestInterface $request): mixed
+	private function createResponse(string $type, ServerRequestInterface $request, string|Closure $callback): mixed
 	{
-		if (is_callable($this->callback)) {
-			return call_user_func($this->callback, $request, $this->parameters);
+		if (is_callable($callback)) {
+			return call_user_func($callback, $request, $type === 'middleware' ? $this : $this->parameters);
 		}
 
-		if (! is_string($this->callback)) {
+		if (! is_string($callback)) {
 			return null;
 		}
 
-		if (! str_contains($this->callback, '->')) {
-			return $this->getInstancedResponse($this->callback, null, $request);
+		if (! str_contains($callback, '->')) {
+			return $this->createInstancedResponse($type, $callback, null, $request);
 		}
 
-		$parts = explode('->', $this->callback);
+		$parts = explode('->', $callback);
 
-		return $this->getInstancedResponse($parts[0], $parts[1], $request);
+		return $this->createInstancedResponse($type, $parts[0], $parts[1], $request);
 	}
 
-	private function getInstancedResponse(string $class, ?string $method, ServerRequestInterface $request): mixed
+	private function createInstancedResponse(string $type, string $class, ?string $method, ServerRequestInterface $request): mixed
 	{
 		if (! class_exists($class)) {
 			throw new LogicException('');
@@ -83,16 +81,51 @@ abstract class RequestHandler implements RequestHandlerInterface
 			? $this->container->get($class)
 			: new $class();
 
-		if (is_null($method) && ! ($instance instanceof RequestHandlerInterface)) {
+		if (! is_object($instance)) {
 			throw new LogicException('');
 		}
 
-		$method ??= 'handle';
+		if ($type === 'middleware' && is_null($method) && ! ($instance instanceof MiddlewareInterface)) {
+			throw new LogicException('');
+		}
+
+		if ($type === 'response' && is_null($method) && ! ($instance instanceof RequestHandlerInterface)) {
+			throw new LogicException('');
+		}
+
+		$method ??= ($type === 'middleware' ? 'process' : 'handle');
 
 		if (! method_exists($instance, $method)) {
 			throw new LogicException('');
 		}
 
-		return $instance->$method($request, $this->parameters);
+		return $instance->$method($request, $type === 'middleware' ? $this : $this->parameters);
+	}
+
+	private function getResponse(string $type, ServerRequestInterface $request, string|Closure $callback): ResponseInterface
+	{
+		$response = $this->createResponse($type, $request, $callback);
+
+		if ($response instanceof ResponseInterface) {
+			return $response;
+		}
+
+		return new Response($this->item->getStatus(), $this->configuration->getDefaultHeaders(), $this->getResponseBody($response));
+	}
+
+	/**
+	 * @return resource|string|StreamInterface
+	 */
+	private function getResponseBody(mixed $body)
+	{
+		if (is_string($body) || is_resource($body) || $body instanceof StreamInterface) {
+			return $body;
+		}
+
+		if (! is_scalar($body)) {
+			throw new LogicException('');
+		}
+
+		return (string) $body;
 	}
 }

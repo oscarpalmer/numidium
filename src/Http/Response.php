@@ -4,16 +4,20 @@ declare(strict_types=1);
 
 namespace oscarpalmer\Numidium\Http;
 
+use LogicException;
 use Nyholm\Psr7\Response as Psr7Response;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
 final class Response
 {
-	private const JSON_OPTIONS = JSON_INVALID_UTF8_SUBSTITUTE | JSON_PRESERVE_ZERO_FRACTION | JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE;
-
 	/**
+	 * Creates a response for a bad request
+	 *
+	 * @param scalar|resource|StreamInterface $body
 	 * @param array<string> $headers
+	 *
+	 * @return ResponseInterface A response with the status '400 Bad Request'
 	 */
 	public static function badRequest(mixed $body, array $headers = []): ResponseInterface
 	{
@@ -21,6 +25,7 @@ final class Response
 	}
 
 	/**
+	 * @param scalar|resource|StreamInterface $body
 	 * @param array<string> $headers
 	 */
 	public static function create(int $status, mixed $body, array $headers = []): ResponseInterface
@@ -29,7 +34,12 @@ final class Response
 	}
 
 	/**
+	 * Creates a response for a missing resource
+	 *
+	 * @param scalar|resource|StreamInterface $body
 	 * @param array<string> $headers
+	 *
+	 * @return ResponseInterface A response with the status '404 Not Found'
 	 */
 	public static function notFound(mixed $body, array $headers = []): ResponseInterface
 	{
@@ -37,7 +47,12 @@ final class Response
 	}
 
 	/**
+	 * Creates an OK response, with status '200 OK'
+	 *
+	 * @param scalar|resource|StreamInterface $body
 	 * @param array<string> $headers
+	 *
+	 * @return ResponseInterface A response with the status '200 OK'
 	 */
 	public static function ok(mixed $body, array $headers = []): ResponseInterface
 	{
@@ -53,16 +68,10 @@ final class Response
 			return $body;
 		}
 
-		if (is_scalar($body)) {
-			return (string) $body;
+		if (! is_scalar($body)) {
+			throw new LogicException('');
 		}
 
-		$encoded = json_encode($body, self::JSON_OPTIONS);
-
-		if ($encoded !== false) {
-			return $encoded;
-		}
-
-		return '';
+		return (string) $body;
 	}
 }

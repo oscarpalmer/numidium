@@ -29,16 +29,29 @@ final class Parameters
 		$this->buildQuery($request->getQueryParams());
 	}
 
+	/**
+	 * Fragment of URL, e.g. #fragment
+	 */
 	public function getFragment(): ?string
 	{
 		return $this->fragment;
 	}
 
+	/**
+	 * Matched parameters in URL path
+	 *
+	 * e.g. '/:name' as route path will become 'getPath()->name' to retrieve the matched value in URL
+	 */
 	public function getPath(): stdClass
 	{
 		return $this->path;
 	}
 
+	/**
+	 * Query of URL
+	 *
+	 * e.g. '?search=numidium' will become 'getQuery()->search' to retrieve the value 'numidium'
+	 */
 	public function getQuery(): stdClass
 	{
 		return $this->query;
