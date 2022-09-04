@@ -7,6 +7,7 @@ namespace oscarpalmer\Numidium\Routing;
 use Closure;
 use League\Container\Container;
 use oscarpalmer\Numidium\Configuration;
+use oscarpalmer\Numidium\Controllers\Manager;
 use oscarpalmer\Numidium\Exception\Response as ExceptionResponse;
 use oscarpalmer\Numidium\Http\Parameters;
 use oscarpalmer\Numidium\Http\Response;
@@ -57,35 +58,34 @@ final class Router
 		$this->routes[$method][] = new Route($this->getRoutePath($path), $callback, $this->getMiddleware($middleware));
 	}
 
-	public function getError(int $status, ServerRequestInterface $request, ?Throwable $throwable = null): ResponseInterface
+	public function getError(int $status, ServerRequestInterface $request, mixed $parameter = null): ResponseInterface
 	{
 		if (isset($this->errors[$status])) {
-			return (new RequestHandler($this->errors[$status]))->prepare($this->configuration, $this->container, $throwable)->handle($request);
+			return (new RequestHandler($this->errors[$status]))->prepare($this->configuration, $this->container, $parameter)->handle($request);
 		}
 
 		$response = Response::create($status, '', $this->configuration->getDefaultHeaders());
 
-		$template = is_null($throwable)
-			? '%s %s'
-			: '%s %s<br><br>%s';
+		$parameter = $parameter instanceof Throwable ? $parameter : null;
+		$template = is_null($parameter) ? '%s %s' : '%s %s<br><br>%s';
 
-		$response->getBody()->write(sprintf($template, $status, $response->getReasonPhrase(), $throwable));
+		$response->getBody()->write(sprintf($template, $status, $response->getReasonPhrase(), $parameter));
 
 		return $response->withProtocolVersion($request->getProtocolVersion());
 	}
 
 	public function run(ServerRequestInterface $request): ResponseInterface
 	{
-		$method = $request->getMethod();
 		$path = $this->getRequestPath($request);
+		$routes = $this->routes[$request->getMethod()];
 
-		foreach ($this->routes[$method] as $route) {
+		foreach ($routes as $route) {
 			if (preg_match($route->getExpression(), $path, $matches)) {
 				throw new ExceptionResponse((new RequestHandler($route))->prepare($this->configuration, $this->container, new Parameters($request, $route, $matches))->handle($request));
 			}
 		}
 
-		return $this->getError(in_array($method, ['GET', 'HEAD']) ? 404 : 405, $request);
+		return (new Manager($this, $this->configuration, $this->container))->respond($request, $path);
 	}
 
 	/**

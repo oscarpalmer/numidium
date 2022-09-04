@@ -89,8 +89,12 @@ final class Parameters
 		}
 	}
 
-	private function getValue(string $value, bool $canBeBool): bool|int|string
+	private function getValue(string $value, bool $canBeBool): bool|float|int|string
 	{
+		if (preg_match('/\a\d*\.\d+\z/', $value)) {
+			return (float) $value;
+		}
+
 		if (preg_match('/\A\d+\z/', $value)) {
 			return (int) $value;
 		}

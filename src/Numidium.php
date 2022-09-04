@@ -8,6 +8,7 @@ use Closure;
 use League\Container\Container;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7Server\ServerRequestCreator;
+use oscarpalmer\Numidium\Exception\Error;
 use oscarpalmer\Numidium\Exception\Response;
 use oscarpalmer\Numidium\Routing\Router;
 use oscarpalmer\Numidium\Routing\Routes;
@@ -18,7 +19,7 @@ use Throwable;
 
 final class Numidium implements RequestHandlerInterface
 {
-	public const VERSION = '0.13.0';
+	public const VERSION = '0.14.0';
 
 	private Configuration $configuration;
 
@@ -55,10 +56,12 @@ final class Numidium implements RequestHandlerInterface
 	{
 		try {
 			return $this->router->run($request);
+		} catch (Error $error) {
+			return $this->router->getError($error->getStatus(), $request, $error->getData());
 		} catch (Response $exception) {
-			return $exception->getResponse()->withProtocolVersion($request->getProtocolVersion());
+			return $exception->getResponse();
 		} catch (Throwable $throwable) {
-			return $this->router->getError(500, $request, $throwable)->withProtocolVersion($request->getProtocolVersion());
+			return $this->router->getError(500, $request, $throwable);
 		}
 	}
 

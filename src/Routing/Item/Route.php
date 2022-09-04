@@ -9,7 +9,7 @@ use Closure;
 final class Route extends Basic
 {
 	private const EXPRESSION_PATTERNS = ['/\A\/*/', '/\/*\z/', '/\//', '/\./', '/\((.*?)\)/', '/\*/', '/#([\w-]+)/', '/:([\w-]+)/'];
-	private const EXPRESSION_REPLACEMENTS = ['/', '/?', '\/', '\.', '(?:\\1)?', '(.*?)', '(\d+)',  '([\w-]+)'];
+	private const EXPRESSION_REPLACEMENTS = ['/', '/?', '\/', '\.', '(?:\\1)?', '(.*?)', '(\d+)', '([\w-]+)'];
 
 	/**
 	 * @param array<string|Closure> $middleware

@@ -17,9 +17,9 @@ final class Routes
 	 *
 	 * @param string $path Path for route
 	 * @param string|Closure $callback Callback for route
-	 * @param array<string|Closure>|string|Closure $middleware Optional middleware
+	 * @param array<string|Closure>|string|Closure|null $middleware Optional middleware
 	 */
-	public function delete(string $path, string|Closure $callback, array|string|Closure $middleware = null): Routes
+	public function delete(string $path, string|Closure $callback, array|string|Closure|null $middleware = null): Routes
 	{
 		$this->router->addRoute('DELETE', $path, $callback, $middleware);
 
@@ -31,9 +31,9 @@ final class Routes
 	 *
 	 * @param int $status Status code for error
 	 * @param string|Closure $callback Callback for route
-	 * @param array<string|Closure>|string|Closure $middleware Optional middleware
+	 * @param array<string|Closure>|string|Closure|null $middleware Optional middleware
 	 */
-	public function error(int $status, string|Closure $callback, array|string|Closure $middleware = null): Routes
+	public function error(int $status, string|Closure $callback, array|string|Closure|null $middleware = null): Routes
 	{
 		$this->router->addError($status, $callback, $middleware);
 
@@ -45,9 +45,9 @@ final class Routes
 	 *
 	 * @param string $path Path for route
 	 * @param string|Closure $callback Callback for route
-	 * @param array<string|Closure>|string|Closure $middleware Optional middleware
+	 * @param array<string|Closure>|string|Closure|null $middleware Optional middleware
 	 */
-	public function get(string $path, string|Closure $callback, array|string|Closure $middleware = null): Routes
+	public function get(string $path, string|Closure $callback, array|string|Closure|null $middleware = null): Routes
 	{
 		$this->router->addRoute('GET', $path, $callback, $middleware);
 		$this->router->addRoute('HEAD', $path, $callback, $middleware);
@@ -60,9 +60,9 @@ final class Routes
 	 *
 	 * @param string $path Path for route
 	 * @param string|Closure $callback Callback for route
-	 * @param array<string|Closure>|string|Closure $middleware Optional middleware
+	 * @param array<string|Closure>|string|Closure|null $middleware Optional middleware
 	 */
-	public function head(string $path, string|Closure $callback, array|string|Closure $middleware = null): Routes
+	public function head(string $path, string|Closure $callback, array|string|Closure|null $middleware = null): Routes
 	{
 		$this->router->addRoute('HEAD', $path, $callback, $middleware);
 
@@ -74,11 +74,11 @@ final class Routes
 	 *
 	 * @param string $path Path for route
 	 * @param string|Closure $callback Callback for route
-	 * @param array<string|Closure>|string|Closure $middleware Optional middleware
+	 * @param array<string|Closure>|string|Closure|null $middleware Optional middleware
 	 */
-	public function options(string $path, string|Closure $callback, array|string|Closure $middleware = null): Routes
+	public function options(string $path, string|Closure $callback, array|string|Closure|null $middleware = null): Routes
 	{
-		$this->router->addRoute('OPTION', $path, $callback, $middleware);
+		$this->router->addRoute('OPTIONS', $path, $callback, $middleware);
 
 		return $this;
 	}
@@ -88,9 +88,9 @@ final class Routes
 	 *
 	 * @param string $path Path for route
 	 * @param string|Closure $callback Callback for route
-	 * @param array<string|Closure>|string|Closure $middleware Optional middleware
+	 * @param array<string|Closure>|string|Closure|null $middleware Optional middleware
 	 */
-	public function patch(string $path, string|Closure $callback, array|string|Closure $middleware = null): Routes
+	public function patch(string $path, string|Closure $callback, array|string|Closure|null $middleware = null): Routes
 	{
 		$this->router->addRoute('PATCH', $path, $callback, $middleware);
 
@@ -102,9 +102,9 @@ final class Routes
 	 *
 	 * @param string $path Path for route
 	 * @param string|Closure $callback Callback for route
-	 * @param array<string|Closure>|string|Closure $middleware Optional middleware
+	 * @param array<string|Closure>|string|Closure|null $middleware Optional middleware
 	 */
-	public function post(string $path, string|Closure $callback, array|string|Closure $middleware = null): Routes
+	public function post(string $path, string|Closure $callback, array|string|Closure|null $middleware = null): Routes
 	{
 		$this->router->addRoute('POST', $path, $callback, $middleware);
 
@@ -116,9 +116,9 @@ final class Routes
 	 *
 	 * @param string $path Path for route
 	 * @param string|Closure $callback Callback for route
-	 * @param array<string|Closure>|string|Closure $middleware Optional middleware
+	 * @param array<string|Closure>|string|Closure|null $middleware Optional middleware
 	 */
-	public function put(string $path, string|Closure $callback, array|string|Closure $middleware = null): Routes
+	public function put(string $path, string|Closure $callback, array|string|Closure|null $middleware = null): Routes
 	{
 		$this->router->addRoute('PUT', $path, $callback, $middleware);
 

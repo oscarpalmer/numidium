@@ -12,11 +12,15 @@ final class Configuration
 	 * @var array<string, string>
 	 */
 	private array $validators = [
-		'default_headers' => 'getValidHeaders',
+		'controller_prefix' => 'getValidControllerPrefix',
+		'default_controller' => 'getValidDefaultController',
+		'default_headers' => 'getValidDefaultHeaders',
 		'path_prefix' => 'getValidPathPrefix',
 	];
 
 	private array $values = [
+		'controller_prefix' => '',
+		'default_controller' => 'home',
 		'default_headers' => [
 			'content-type' => 'text/html; charset=utf-8',
 		],
@@ -39,6 +43,16 @@ final class Configuration
 		}
 	}
 
+	public function getControllerPrefix(): string
+	{
+		return $this->values['controller_prefix'];
+	}
+
+	public function getDefaultController(): string
+	{
+		return $this->values['default_controller'];
+	}
+
 	/**
 	 * @return array<string, string>
 	 */
@@ -52,10 +66,34 @@ final class Configuration
 		return $this->values['path_prefix'];
 	}
 
+	private function getValidControllerPrefix(mixed $prefix): string
+	{
+		if (! is_string($prefix)) {
+			throw new LogicException('');
+		}
+
+		$prefix = trim($prefix, '/\\');
+
+		if (mb_strlen($prefix, 'utf-8') === 0) {
+			return $prefix;
+		}
+
+		return str_replace('/', '\\', $prefix) . '\\';
+	}
+
+	private function getValidDefaultController(mixed $controller): string
+	{
+		if (! is_string($controller)) {
+			throw new LogicException('');
+		}
+
+		return $controller;
+	}
+
 	/**
 	 * @return array<string, string>
 	 */
-	private function getValidHeaders(mixed $headers): array
+	private function getValidDefaultHeaders(mixed $headers): array
 	{
 		if (! is_array($headers)) {
 			throw new LogicException('');
@@ -76,6 +114,6 @@ final class Configuration
 			return $prefix;
 		}
 
-		return "/{$prefix}";
+		return '/' . $prefix;
 	}
 }

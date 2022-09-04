@@ -10,6 +10,7 @@ use LogicException;
 use Nyholm\Psr7\Response;
 use oscarpalmer\Numidium\Configuration;
 use oscarpalmer\Numidium\Routing\Item\Basic;
+use oscarpalmer\Numidium\Routing\Item\Error;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
@@ -107,10 +108,18 @@ final class RequestHandler implements RequestHandlerInterface
 		$response = $this->createResponse($type, $request, $callback);
 
 		if ($response instanceof ResponseInterface) {
-			return $response;
+			if ($this->item instanceof Error) {
+				$response = $response->withStatus($this->item->getStatus());
+			}
+
+			return $response->withProtocolVersion($request->getProtocolVersion());
 		}
 
-		return new Response($this->item->getStatus(), $this->configuration->getDefaultHeaders(), $this->getResponseBody($response));
+		return (new Response(
+			$this->item->getStatus(),
+			$this->configuration->getDefaultHeaders(),
+			$this->getResponseBody($response),
+		))->withProtocolVersion($request->getProtocolVersion());
 	}
 
 	/**
