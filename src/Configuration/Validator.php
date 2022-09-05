@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace oscarpalmer\Numidium;
+namespace oscarpalmer\Numidium\Configuration;
 
 use LogicException;
 
-final class Configuration
+final class Validator
 {
 	/**
 	 * @var array<string, string>
@@ -18,52 +18,13 @@ final class Configuration
 		'path_prefix' => 'getValidPathPrefix',
 	];
 
-	private array $values = [
-		'controller_prefix' => '',
-		'default_controller' => 'home',
-		'default_headers' => [
-			'content-type' => 'text/html; charset=utf-8',
-		],
-		'path_prefix' => '',
-	];
-
-	/**
-	 * @param array<string, mixed> $configuration
-	 */
-	public function __construct(array $configuration = [])
+	public function validate(string $key, mixed $value): mixed
 	{
-		foreach ($configuration as $key => $value) {
-			if (! isset($this->values[$key])) {
-				continue;
-			}
-
-			$this->values[$key] = isset($this->validators[$key])
-				? $this->{$this->validators[$key]}($value)
-				: $value;
+		if (! array_key_exists($key, $this->validators)) {
+			return $value;
 		}
-	}
 
-	public function getControllerPrefix(): string
-	{
-		return $this->values['controller_prefix'];
-	}
-
-	public function getDefaultController(): string
-	{
-		return $this->values['default_controller'];
-	}
-
-	/**
-	 * @return array<string, string>
-	 */
-	public function getDefaultHeaders(): array
-	{
-		return $this->values['default_headers'];
-	}
-
-	public function getPathPrefix(): string
-	{
-		return $this->values['path_prefix'];
+		return $this->{$this->validators[$key]}($value);
 	}
 
 	private function getValidControllerPrefix(mixed $prefix): string

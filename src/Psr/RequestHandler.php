@@ -8,7 +8,7 @@ use Closure;
 use League\Container\Container;
 use LogicException;
 use Nyholm\Psr7\Response;
-use oscarpalmer\Numidium\Configuration;
+use oscarpalmer\Numidium\Configuration\Configuration;
 use oscarpalmer\Numidium\Routing\Item\Basic;
 use oscarpalmer\Numidium\Routing\Item\Error;
 use Psr\Http\Message\ResponseInterface;

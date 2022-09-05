@@ -6,7 +6,7 @@ namespace oscarpalmer\Numidium\Routing;
 
 use Closure;
 use League\Container\Container;
-use oscarpalmer\Numidium\Configuration;
+use oscarpalmer\Numidium\Configuration\Configuration;
 use oscarpalmer\Numidium\Controllers\Manager;
 use oscarpalmer\Numidium\Exception\Response as ExceptionResponse;
 use oscarpalmer\Numidium\Http\Parameters;

@@ -8,6 +8,7 @@ use Closure;
 use League\Container\Container;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7Server\ServerRequestCreator;
+use oscarpalmer\Numidium\Configuration\Configuration;
 use oscarpalmer\Numidium\Exception\Error;
 use oscarpalmer\Numidium\Exception\Response;
 use oscarpalmer\Numidium\Routing\Router;
@@ -19,7 +20,7 @@ use Throwable;
 
 final class Numidium implements RequestHandlerInterface
 {
-	public const VERSION = '0.14.0';
+	public const VERSION = '0.15.0';
 
 	private Configuration $configuration;
 

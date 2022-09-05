@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace oscarpalmer\Numidium\Controllers;
 
 use League\Container\Container;
-use oscarpalmer\Numidium\Configuration;
+use oscarpalmer\Numidium\Configuration\Configuration;
 use oscarpalmer\Numidium\Exception\Response;
 use oscarpalmer\Numidium\Psr\RequestHandler;
 use oscarpalmer\Numidium\Routing\Item\Route;
@@ -42,26 +42,28 @@ final class Manager
 	{
 		$prefix = $this->configuration->getControllerPrefix();
 
-		foreach ($callbacks as $v) {
-			$class = $prefix . str_replace('/', '\\', $v[0]);
-			$method = $v[1];
+		foreach ($callbacks as $callback) {
+			$class = $prefix . str_replace('/', '\\', $callback[0]);
+			$method = $callback[1];
 
 			try {
-				if (@method_exists($class, $method)) {
-					$pattern = '/' . str_replace('\\', '\\\\', $class) . '/i';
-
-					$matches = array_values(array_filter(get_declared_classes(), function ($declared) use ($pattern) {
-						return preg_match($pattern, $declared) === 1;
-					}));
-
-					if (count($matches) === 0) {
-						continue;
-					}
-
-					$callback = $matches[0] . '->' . $method;
-
-					return true;
+				if (! @method_exists($class, $method)) {
+					continue;
 				}
+
+				$pattern = '/' . str_replace('\\', '\\\\', $class) . '/i';
+
+				$matches = array_values(array_filter(get_declared_classes(), function ($declared) use ($pattern) {
+					return preg_match($pattern, $declared) === 1;
+				}));
+
+				if (count($matches) === 0) {
+					continue;
+				}
+
+				$callback = $matches[0] . '->' . $method;
+
+				return true;
 			} catch (Throwable) {
 				continue;
 			}
