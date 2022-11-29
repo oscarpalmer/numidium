@@ -4,24 +4,22 @@ declare(strict_types=1);
 
 namespace oscarpalmer\Numidium\Routing\Item;
 
-use Closure;
-
 abstract class Basic
 {
 	/**
-	 * @param array<string|Closure> $middleware
+	 * @param array<callable|string> $middleware
 	 */
-	public function __construct(protected readonly int $status, protected readonly string|null $path, protected readonly string|Closure $callback, protected readonly array $middleware)
+	public function __construct(protected readonly int $status, protected readonly string|null $path, protected readonly mixed $callback, protected readonly array $middleware)
 	{
 	}
 
-	public function getCallback(): string|Closure
+	public function getCallback(): mixed
 	{
 		return $this->callback;
 	}
 
 	/**
-	 * @return array<string|Closure>
+	 * @return array<callable|string>
 	 */
 	public function getMiddleware(): array
 	{

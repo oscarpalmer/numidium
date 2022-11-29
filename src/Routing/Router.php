@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace oscarpalmer\Numidium\Routing;
 
-use Closure;
 use League\Container\Container;
 use oscarpalmer\Numidium\Configuration\Configuration;
 use oscarpalmer\Numidium\Controllers\Manager;
@@ -20,6 +19,8 @@ use Throwable;
 
 final class Router
 {
+	private readonly Manager $controllers;
+
 	/**
 	 * @var array<Error>
 	 */
@@ -29,7 +30,7 @@ final class Router
 	 * @var array<array<Route>>
 	 */
 	private array $routes = [
-		'DElETE' => [],
+		'DELETE' => [],
 		'GET' => [],
 		'HEAD' => [],
 		'OPTIONS' => [],
@@ -40,20 +41,21 @@ final class Router
 
 	public function __construct(private readonly Configuration $configuration, private readonly Container $container)
 	{
+		$this->controllers = new Manager($this, $configuration, $container);
 	}
 
 	/**
-	 * @param array<string|Closure> $middleware
+	 * @param array<callable|string>|callable|string|null $middleware
 	 */
-	public function addError(int $status, string|Closure $callback, array|string|Closure|null $middleware): void
+	public function addError(int $status, callable|string $callback, array|callable|string|null $middleware): void
 	{
 		$this->errors[$status] = new Error($status, $callback, $this->getMiddleware($middleware));
 	}
 
 	/**
-	 * @param array<string|Closure> $middleware
+	 * @param array<callable|string>|callable|string|null $middleware
 	 */
-	public function addRoute(string $method, string $path, string|Closure $callback, array|string|Closure|null $middleware): void
+	public function addRoute(string $method, string $path, callable|string $callback, array|callable|string|null $middleware): void
 	{
 		$this->routes[$method][] = new Route($this->getRoutePath($path), $callback, $this->getMiddleware($middleware));
 	}
@@ -66,8 +68,13 @@ final class Router
 
 		$response = Response::create($status, '', $this->configuration->getDefaultHeaders());
 
-		$parameter = $parameter instanceof Throwable ? $parameter : null;
-		$template = is_null($parameter) ? '%s %s' : '%s %s<br><br>%s';
+		$parameter = $parameter instanceof Throwable
+			? $parameter
+			: null;
+
+		$template = is_null($parameter)
+			? '%s %s'
+			: '%s %s<br><br>%s';
 
 		$response->getBody()->write(sprintf($template, $status, $response->getReasonPhrase(), $parameter));
 
@@ -85,15 +92,15 @@ final class Router
 			}
 		}
 
-		return (new Manager($this, $this->configuration, $this->container))->respond($request, $path);
+		return $this->controllers->respond($request, $path);
 	}
 
 	/**
-	 * @param array<string|Closure>|string|Closure|null $middleware
+	 * @param array<callable|string>|callable|string|null $middleware
 	 *
-	 * @return array<string|Closure>
+	 * @return array<callable|string>
 	 */
-	private function getMiddleware(array|string|Closure|null $middleware): array
+	private function getMiddleware(array|callable|string|null $middleware): array
 	{
 		if (is_null($middleware)) {
 			return [];

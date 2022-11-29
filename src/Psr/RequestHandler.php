@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace oscarpalmer\Numidium\Psr;
 
-use Closure;
 use League\Container\Container;
 use LogicException;
 use Nyholm\Psr7\Response;
@@ -24,9 +23,9 @@ final class RequestHandler implements RequestHandlerInterface
 	private Container $container;
 
 	/**
-	 * @var array<string|Closure>
+	 * @var array<callable|string>
 	 */
-	private array $middleware;
+	private array $middleware = [];
 
 	private mixed $parameters;
 
@@ -53,14 +52,17 @@ final class RequestHandler implements RequestHandlerInterface
 		return $this;
 	}
 
-	private function createResponse(string $type, ServerRequestInterface $request, string|Closure $callback): mixed
+	private function createResponse(string $type, ServerRequestInterface $request, mixed $callback): mixed
 	{
 		if (is_callable($callback)) {
 			return call_user_func($callback, $request, $type === 'middleware' ? $this : $this->parameters);
 		}
 
 		if (! is_string($callback)) {
+			// Ignored as $callback is defined as mixed, but should really be a callable or string due to type hints
+			// @codeCoverageIgnoreStart
 			return null;
+			// @codeCoverageIgnoreEnd
 		}
 
 		if (! str_contains($callback, '->')) {
@@ -74,8 +76,10 @@ final class RequestHandler implements RequestHandlerInterface
 
 	private function createInstancedResponse(string $type, string $class, ?string $method, ServerRequestInterface $request): mixed
 	{
-		if (! class_exists($class)) {
-			throw new LogicException('');
+		$isMiddleware = $type === 'middleware';
+
+		if (! @class_exists($class)) {
+			throw new LogicException("The class '{$class}' does not exist.");
 		}
 
 		$instance = $this->container->has($class)
@@ -83,27 +87,39 @@ final class RequestHandler implements RequestHandlerInterface
 			: new $class();
 
 		if (! is_object($instance)) {
-			throw new LogicException('');
+			// Ignored as $instance is defined as mixed, but should really be an object
+			// @codeCoverageIgnoreStart
+			throw new LogicException("Unable to instatiate the class '{$class}'.");
+			// @codeCoverageIgnoreEnd
 		}
 
-		if ($type === 'middleware' && is_null($method) && ! ($instance instanceof MiddlewareInterface)) {
-			throw new LogicException('');
-		}
+		if (is_null($method)) {
+			if (($isMiddleware && ! ($instance instanceof MiddlewareInterface))
+				|| (! $isMiddleware && ! ($instance instanceof RequestHandlerInterface))) {
+				$expected = $isMiddleware
+					? MiddlewareInterface::class
+					: RequestHandlerInterface::class;
 
-		if ($type === 'response' && is_null($method) && ! ($instance instanceof RequestHandlerInterface)) {
-			throw new LogicException('');
-		}
+				throw new LogicException("Simple callback string provided, expected class '{$class}' to inherit '{$expected}'.");
+			}
 
-		$method ??= ($type === 'middleware' ? 'process' : 'handle');
+			$method = $isMiddleware
+				? 'process'
+				: 'handle';
+		}
 
 		if (! method_exists($instance, $method)) {
-			throw new LogicException('');
+			throw new LogicException("The method '{$method}' could not be found for class '{$class}'.");
 		}
 
-		return $instance->$method($request, $type === 'middleware' ? $this : $this->parameters);
+		return $instance->$method(
+			$request,
+			$isMiddleware ? $this : $this->parameters,
+			$isMiddleware ? $this->parameters : null,
+		);
 	}
 
-	private function getResponse(string $type, ServerRequestInterface $request, string|Closure $callback): ResponseInterface
+	private function getResponse(string $type, ServerRequestInterface $request, mixed $callback): ResponseInterface
 	{
 		$response = $this->createResponse($type, $request, $callback);
 
@@ -132,7 +148,7 @@ final class RequestHandler implements RequestHandlerInterface
 		}
 
 		if (! is_scalar($body)) {
-			throw new LogicException('');
+			throw new LogicException('Response body must be scalar, a resource, or inherit \'StreamInterface\'.');
 		}
 
 		return (string) $body;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace oscarpalmer\Numidium\Http;
 
-use LogicException;
+use InvalidArgumentException;
 use Nyholm\Psr7\Response as Psr7Response;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
@@ -108,7 +108,7 @@ final class Response
 		}
 
 		if (! is_scalar($body)) {
-			throw new LogicException('');
+			throw new InvalidArgumentException('Response body must be scalar, a resource, or inherit \'StreamInterface\'.');
 		}
 
 		return (string) $body;

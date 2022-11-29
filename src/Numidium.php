@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace oscarpalmer\Numidium;
 
-use Closure;
 use League\Container\Container;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7Server\ServerRequestCreator;
@@ -20,7 +19,7 @@ use Throwable;
 
 final class Numidium implements RequestHandlerInterface
 {
-	public const VERSION = '0.15.0';
+	public const VERSION = '0.16.0';
 
 	private Configuration $configuration;
 
@@ -43,7 +42,7 @@ final class Numidium implements RequestHandlerInterface
 	/**
 	 * Add injectable dependencies for route callbacks
 	 */
-	public function dependencies(Closure $callback): Numidium
+	public function dependencies(callable $callback): Numidium
 	{
 		call_user_func($callback, new Dependencies($this->container));
 
@@ -69,7 +68,7 @@ final class Numidium implements RequestHandlerInterface
 	/**
 	 * Add routes for responding to HTTP requests
 	 */
-	public function routes(Closure $callback): Numidium
+	public function routes(callable $callback): Numidium
 	{
 		call_user_func($callback, new Routes($this->router));
 
@@ -83,8 +82,7 @@ final class Numidium implements RequestHandlerInterface
 	{
 		ob_start();
 
-		$request ??= $this->createRequest();
-		$response = $this->handle($request);
+		$response = $this->handle($request ?? $this->createRequest());
 
 		ob_end_clean();
 

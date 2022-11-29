@@ -10,7 +10,7 @@ use stdClass;
 
 final class Parameters
 {
-	private ?string $fragment;
+	private ?string $fragment = null;
 	private stdClass $path;
 	private stdClass $query;
 
@@ -91,7 +91,7 @@ final class Parameters
 
 	private function getValue(string $value, bool $canBeBool): bool|float|int|string
 	{
-		if (preg_match('/\a\d*\.\d+\z/', $value)) {
+		if (preg_match('/\A\d*\.\d+\z/', $value)) {
 			return (float) $value;
 		}
 

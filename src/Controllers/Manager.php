@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace oscarpalmer\Numidium\Controllers;
 
+use Exception;
 use League\Container\Container;
 use oscarpalmer\Numidium\Configuration\Configuration;
 use oscarpalmer\Numidium\Exception\Response;
@@ -47,9 +48,7 @@ final class Manager
 			$method = $callback[1];
 
 			try {
-				if (! @method_exists($class, $method)) {
-					continue;
-				}
+				$this->loadCallback($class, $method);
 
 				$pattern = '/' . str_replace('\\', '\\\\', $class) . '/i';
 
@@ -57,13 +56,11 @@ final class Manager
 					return preg_match($pattern, $declared) === 1;
 				}));
 
-				if (count($matches) === 0) {
-					continue;
+				if (count($matches) > 0) {
+					$callback = $matches[0] . '->' . $method;
+
+					return true;
 				}
-
-				$callback = $matches[0] . '->' . $method;
-
-				return true;
 			} catch (Throwable) {
 				continue;
 			}
@@ -78,10 +75,6 @@ final class Manager
 		$trimmed = trim($unprefixed, '/');
 
 		$matched = preg_match('/\A(.*)\/(.*)\z/', $trimmed, $matches);
-
-		if ($matched === false) {
-			return false;
-		}
 
 		$callbacks = $this->getCallbacks($trimmed, $matched === 1, $matches);
 
@@ -112,5 +105,12 @@ final class Manager
 		$callbacks[] = [$matches[1], $matches[2]];
 
 		return $callbacks;
+	}
+
+	private function loadCallback(string $class, string $method): void
+	{
+		if (! @class_exists($class) || ! @method_exists($class, $method)) {
+			throw new Exception();
+		}
 	}
 }
