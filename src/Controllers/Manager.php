@@ -30,7 +30,9 @@ final class Manager
 			$route = new Route('', $callback, []);
 			$handler = new RequestHandler($route);
 
-			throw new Response($handler->prepare($this->configuration, $this->container, null)->handle($request));
+			$prepared = $handler->prepare($this->configuration, $this->container, null);
+
+			throw new Response($prepared->handle($request));
 		}
 
 		return $this->router->getError(404, $request);
@@ -96,13 +98,11 @@ final class Manager
 
 		$callbacks = [[$original, 'handle'], [$original, 'index']];
 
-		if (! $matched) {
+		if ($matched) {
+			$callbacks[] = [$matches[1], $matches[2]];
+		} else {
 			$callbacks[] = [$defaultController, $original];
-
-			return $callbacks;
 		}
-
-		$callbacks[] = [$matches[1], $matches[2]];
 
 		return $callbacks;
 	}

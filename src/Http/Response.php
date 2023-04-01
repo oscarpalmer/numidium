@@ -108,7 +108,7 @@ final class Response
 		}
 
 		if (! is_scalar($body)) {
-			throw new InvalidArgumentException('Response body must be scalar, a resource, or inherit \'StreamInterface\'.');
+			throw new InvalidArgumentException('Response body must be scalar, a resource, or inherit \'StreamInterface\'');
 		}
 
 		return (string) $body;

@@ -57,6 +57,26 @@ final class Parameters
 		return $this->query;
 	}
 
+	private function addPathValue(string $key, string $value): void
+	{
+		$normalizedKey = ltrim($key, ':#');
+		$normalizedValue = $this->getValue($value, false);
+
+		if (! isset($this->path->{$normalizedKey})) {
+			$this->path->{$normalizedKey} = $normalizedValue;
+
+			return;
+		}
+
+		if (is_array($this->path->{$normalizedKey})) {
+			$this->path->{$normalizedKey}[] = $normalizedValue;
+
+			return;
+		}
+
+		$this->path->{$normalizedKey} = [$this->path->{$normalizedKey}, $normalizedValue];
+	}
+
 	/**
 	 * @param array<string> $path
 	 */
@@ -69,7 +89,7 @@ final class Parameters
 		preg_match_all('/((?:#|:)[\w-]+|\*)/', $route, $keys);
 
 		foreach ($keys[0] as $index => $key) {
-			$this->setPathValue($key, $path[$index]);
+			$this->addPathValue($key, $path[$index]);
 		}
 	}
 
@@ -104,25 +124,5 @@ final class Parameters
 		}
 
 		return $value;
-	}
-
-	private function setPathValue(string $key, string $value): void
-	{
-		$normalizedKey = ltrim($key, ':#');
-		$normalizedValue = $this->getValue($value, false);
-
-		if (! isset($this->path->{$normalizedKey})) {
-			$this->path->{$normalizedKey} = $normalizedValue;
-
-			return;
-		}
-
-		if (is_array($this->path->{$normalizedKey})) {
-			$this->path->{$normalizedKey}[] = $normalizedValue;
-
-			return;
-		}
-
-		$this->path->{$normalizedKey} = [$this->path->{$normalizedKey}, $normalizedValue];
 	}
 }

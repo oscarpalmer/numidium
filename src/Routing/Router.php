@@ -88,7 +88,12 @@ final class Router
 
 		foreach ($routes as $route) {
 			if (preg_match($route->getExpression(), $path, $matches)) {
-				throw new ExceptionResponse((new RequestHandler($route))->prepare($this->configuration, $this->container, new Parameters($request, $route, $matches))->handle($request));
+				$handler = new RequestHandler($route);
+				$parameters = new Parameters($request, $route, $matches);
+
+				$prepared = $handler->prepare($this->configuration, $this->container, $parameters);
+
+				throw new ExceptionResponse($prepared->handle($request));
 			}
 		}
 

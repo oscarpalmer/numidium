@@ -22,7 +22,6 @@
 	"license": "MIT",
 	"name": "oscarpalmer/numidium",
 	"require": {
-		"friendsofphp/php-cs-fixer": "v3.9.5",
 		"league/container": "^4.2",
 		"nyholm/psr7": "^1.5",
 		"nyholm/psr7-server": "^1.0",
@@ -31,10 +30,11 @@
 		"psr/http-server-middleware": "^1.0"
 	},
 	"require-dev": {
-		"nunomaduro/phpinsights": "^2.4",
-		"phpstan/phpstan": "^1.8",
-		"phpunit/php-code-coverage": ">=9.2",
-		"phpunit/phpunit": ">=9.5"
+		"friendsofphp/php-cs-fixer": "^3.15",
+		"nunomaduro/phpinsights": "^2.8",
+		"phpstan/phpstan": "^1.10",
+		"phpunit/php-code-coverage": "^10.0",
+		"phpunit/phpunit": "^10.0"
 	},
 	"type": "library",
 	"config": {

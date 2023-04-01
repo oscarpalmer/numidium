@@ -79,7 +79,7 @@ final class RequestHandler implements RequestHandlerInterface
 		$isMiddleware = $type === 'middleware';
 
 		if (! @class_exists($class)) {
-			throw new LogicException("The class '{$class}' does not exist.");
+			throw new LogicException("The class '{$class}' does not exist");
 		}
 
 		$instance = $this->container->has($class)
@@ -89,7 +89,7 @@ final class RequestHandler implements RequestHandlerInterface
 		if (! is_object($instance)) {
 			// Ignored as $instance is defined as mixed, but should really be an object
 			// @codeCoverageIgnoreStart
-			throw new LogicException("Unable to instatiate the class '{$class}'.");
+			throw new LogicException("Unable to instatiate the class '{$class}'");
 			// @codeCoverageIgnoreEnd
 		}
 
@@ -100,7 +100,7 @@ final class RequestHandler implements RequestHandlerInterface
 					? MiddlewareInterface::class
 					: RequestHandlerInterface::class;
 
-				throw new LogicException("Simple callback string provided, expected class '{$class}' to inherit '{$expected}'.");
+				throw new LogicException("Simple callback string provided, expected class '{$class}' to inherit '{$expected}'");
 			}
 
 			$method = $isMiddleware
@@ -109,14 +109,13 @@ final class RequestHandler implements RequestHandlerInterface
 		}
 
 		if (! method_exists($instance, $method)) {
-			throw new LogicException("The method '{$method}' could not be found for class '{$class}'.");
+			throw new LogicException("The method '{$method}' could not be found for class '{$class}'");
 		}
 
-		return $instance->$method(
-			$request,
-			$isMiddleware ? $this : $this->parameters,
-			$isMiddleware ? $this->parameters : null,
-		);
+		$first = $isMiddleware ? $this : $this->parameters;
+		$second = $isMiddleware ? $this->parameters : null;
+
+		return $instance->$method($request, $first, $second);
 	}
 
 	private function getResponse(string $type, ServerRequestInterface $request, mixed $callback): ResponseInterface
@@ -131,11 +130,13 @@ final class RequestHandler implements RequestHandlerInterface
 			return $response->withProtocolVersion($request->getProtocolVersion());
 		}
 
-		return (new Response(
-			$this->item->getStatus(),
-			$this->configuration->getDefaultHeaders(),
-			$this->getResponseBody($response),
-		))->withProtocolVersion($request->getProtocolVersion());
+		$status = $this->item->getStatus();
+		$headers = $this->configuration->getDefaultHeaders();
+		$body = $this->getResponseBody($response);
+
+		$response = new Response($status, $headers, $body);
+
+		return $response->withProtocolVersion($request->getProtocolVersion());
 	}
 
 	/**
@@ -148,7 +149,7 @@ final class RequestHandler implements RequestHandlerInterface
 		}
 
 		if (! is_scalar($body)) {
-			throw new LogicException('Response body must be scalar, a resource, or inherit \'StreamInterface\'.');
+			throw new LogicException('Response body must be scalar, a resource, or inherit \'StreamInterface\'');
 		}
 
 		return (string) $body;

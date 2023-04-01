@@ -9,8 +9,12 @@ abstract class Basic
 	/**
 	 * @param array<callable|string> $middleware
 	 */
-	public function __construct(protected readonly int $status, protected readonly string|null $path, protected readonly mixed $callback, protected readonly array $middleware)
-	{
+	public function __construct(
+		protected readonly int $status,
+		protected readonly string|null $path,
+		protected readonly mixed $callback,
+		protected readonly array $middleware
+	) {
 	}
 
 	public function getCallback(): mixed
