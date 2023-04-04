@@ -19,7 +19,7 @@ use Throwable;
 
 final class Numidium implements RequestHandlerInterface
 {
-	public const VERSION = '0.16.0';
+	public const VERSION = '0.17.0';
 
 	private Configuration $configuration;
 
