@@ -27,9 +27,7 @@ final class Manager
 	public function respond(ServerRequestInterface $request, string $path): ResponseInterface
 	{
 		if ($this->findCallback($path, $callback)) {
-			$route = new Route('', $callback, []);
-			$handler = new RequestHandler($route);
-
+			$handler = new RequestHandler($callback->toRoute());
 			$prepared = $handler->prepare($this->configuration, $this->container, null);
 
 			throw new Response($prepared->handle($request));
@@ -39,27 +37,28 @@ final class Manager
 	}
 
 	/**
-	 * @param array<array<string>> $callbacks
+	 * @param array<Callback> $callbacks
 	 */
-	private function evaluateCallbacks(array $callbacks, ?string &$callback): bool
+	private function evaluateCallbacks(array $callbacks, ?Callback &$returned): bool
 	{
 		$prefix = $this->configuration->getControllerPrefix();
 
 		foreach ($callbacks as $callback) {
-			$class = $prefix . str_replace('/', '\\', $callback[0]);
-			$method = $callback[1];
+			$class = $callback->getClass();
+			$method = $callback->getMethod();
+
+			$class = sprintf('%s%s', $prefix, str_replace('/', '\\', $callback->getClass()));
+			$pattern = sprintf('/\A%s\z/i', str_replace('\\', '\\\\', $class));
 
 			try {
 				$this->loadCallback($class, $method);
-
-				$pattern = '/' . str_replace('\\', '\\\\', $class) . '/i';
 
 				$matches = array_values(array_filter(get_declared_classes(), function ($declared) use ($pattern) {
 					return preg_match($pattern, $declared) === 1;
 				}));
 
-				if (count($matches) > 0) {
-					$callback = $matches[0] . '->' . $method;
+				if (count($matches) === 1) {
+					$returned = new Callback($matches[0], $method);
 
 					return true;
 				}
@@ -71,14 +70,14 @@ final class Manager
 		return false;
 	}
 
-	private function findCallback(string $path, ?string &$callback): bool
+	private function findCallback(string $path, ?Callback &$callback): bool
 	{
 		$unprefixed = ltrim($path, $this->configuration->getPathPrefix());
 		$trimmed = trim($unprefixed, '/');
 
-		$matched = preg_match('/\A(.*)\/(.*)\z/', $trimmed, $matches);
+		preg_match('/\A(.*)\/(.*)\z/', $trimmed, $matches);
 
-		$callbacks = $this->getCallbacks($trimmed, $matched === 1, $matches);
+		$callbacks = $this->getCallbacks($trimmed, $matches);
 
 		return $this->evaluateCallbacks($callbacks, $callback);
 	}
@@ -86,25 +85,21 @@ final class Manager
 	/**
 	 * @param array<string> $matches
 	 *
-	 * @return array<array<string>>
+	 * @return array<Callback>
 	 */
-	private function getCallbacks(string $original, bool $matched, array $matches): array
+	private function getCallbacks(string $original, array $matches): array
 	{
-		$defaultController = $this->configuration->getDefaultController();
-
-		if (mb_strlen($original, 'utf-8') === 0) {
-			return [[$defaultController, 'handle'], [$defaultController, 'index']];
+		if (count($matches) === 3) {
+			return [
+				new Callback($matches[1], $matches[2]),
+				new Callback($original, 'handle'),
+			];
 		}
 
-		$callbacks = [[$original, 'handle'], [$original, 'index']];
-
-		if ($matched) {
-			$callbacks[] = [$matches[1], $matches[2]];
-		} else {
-			$callbacks[] = [$defaultController, $original];
-		}
-
-		return $callbacks;
+		return [
+			new Callback($original, 'handle'),
+			new Callback($this->configuration->getDefaultController(), $original),
+		];
 	}
 
 	private function loadCallback(string $class, string $method): void

@@ -74,48 +74,53 @@ final class RequestHandler implements RequestHandlerInterface
 		return $this->createInstancedResponse($type, $parts[0], $parts[1], $request);
 	}
 
-	private function createInstancedResponse(string $type, string $class, ?string $method, ServerRequestInterface $request): mixed
+	private function createInstancedResponse(string $type, string $name, ?string $method, ServerRequestInterface $request): mixed
 	{
 		$isMiddleware = $type === 'middleware';
 
-		if (! @class_exists($class)) {
-			throw new LogicException("The class '{$class}' does not exist");
+		if (! @class_exists($name)) {
+			throw new LogicException("The class '{$name}' does not exist");
 		}
 
-		$instance = $this->container->has($class)
-			? $this->container->get($class)
-			: new $class();
+		$instance = $this->container->has($name)
+			? $this->container->get($name)
+			: new $name();
 
 		if (! is_object($instance)) {
 			// Ignored as $instance is defined as mixed, but should really be an object
 			// @codeCoverageIgnoreStart
-			throw new LogicException("Unable to instatiate the class '{$class}'");
+			throw new LogicException("Unable to instatiate the class '{$name}'");
 			// @codeCoverageIgnoreEnd
 		}
 
 		if (is_null($method)) {
-			if (($isMiddleware && ! ($instance instanceof MiddlewareInterface))
-				|| (! $isMiddleware && ! ($instance instanceof RequestHandlerInterface))) {
-				$expected = $isMiddleware
-					? MiddlewareInterface::class
-					: RequestHandlerInterface::class;
-
-				throw new LogicException("Simple callback string provided, expected class '{$class}' to inherit '{$expected}'");
-			}
-
-			$method = $isMiddleware
-				? 'process'
-				: 'handle';
+			$method = $this->getMethod($name, $instance, $isMiddleware);
 		}
 
 		if (! method_exists($instance, $method)) {
-			throw new LogicException("The method '{$method}' could not be found for class '{$class}'");
+			throw new LogicException("The method '{$method}' could not be found for class '{$name}'");
 		}
 
 		$first = $isMiddleware ? $this : $this->parameters;
 		$second = $isMiddleware ? $this->parameters : null;
 
 		return $instance->$method($request, $first, $second);
+	}
+
+	private function getMethod(string $name, mixed $instance, bool $isMiddleware): string
+	{
+		if (($isMiddleware && ! ($instance instanceof MiddlewareInterface))
+			|| (! $isMiddleware && ! ($instance instanceof RequestHandlerInterface))) {
+			$expected = $isMiddleware
+				? MiddlewareInterface::class
+				: RequestHandlerInterface::class;
+
+			throw new LogicException("Simple callback string provided, expected class '{$name}' to inherit '{$expected}'");
+		}
+
+		return $isMiddleware
+			? 'process'
+			: 'handle';
 	}
 
 	private function getResponse(string $type, ServerRequestInterface $request, mixed $callback): ResponseInterface
