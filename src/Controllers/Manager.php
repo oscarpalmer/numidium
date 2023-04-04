@@ -44,7 +44,6 @@ final class Manager
 		$prefix = $this->configuration->getControllerPrefix();
 
 		foreach ($callbacks as $callback) {
-			$class = $callback->getClass();
 			$method = $callback->getMethod();
 
 			$class = sprintf('%s%s', $prefix, str_replace('/', '\\', $callback->getClass()));

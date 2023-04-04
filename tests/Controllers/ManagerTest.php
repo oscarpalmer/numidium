@@ -9,6 +9,7 @@ use League\Container\Container;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7Server\ServerRequestCreator;
 use oscarpalmer\Numidium\Configuration\Configuration;
+use oscarpalmer\Numidium\Controllers\Callback;
 use oscarpalmer\Numidium\Exception\Response;
 use oscarpalmer\Numidium\Routing\Router;
 use oscarpalmer\Numidium\Test\NumidiumTest;
@@ -16,7 +17,19 @@ use PHPUnit\Framework\TestCase;
 
 final class ManagerTest extends TestCase
 {
-	public function test(): void
+	public function testCallback(): void
+	{
+		$callback = new Callback('x', 'y');
+
+		$this->assertSame('x', $callback->getClass());
+		$this->assertSame('y', $callback->getMethod());
+
+		$route = $callback->toRoute();
+
+		$this->assertInstanceOf('oscarpalmer\Numidium\Routing\Item\Route', $route);
+	}
+
+	public function testRespond(): void
 	{
 		$factory = new Psr17Factory();
 		$creator = new ServerRequestCreator($factory, $factory, $factory, $factory);
