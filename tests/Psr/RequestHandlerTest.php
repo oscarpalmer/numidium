@@ -19,12 +19,27 @@ use stdClass;
 
 final class RequestHandlerTest extends TestCase
 {
+	public function testBadResource(): void
+	{
+		$handler = new RequestHandler(new Route('', 'oscarpalmer\Numidium\Test\Fake\Inherited', [], true));
+
+		try {
+			$handler
+				->prepare(new Configuration(), new Container(), null)
+				->handle(NumidiumTest::getRequest());
+		} catch (Exception $exception) {
+			$this->assertInstanceOf('LogicException', $exception);
+		}
+	}
+
 	public function testDefaultMethods(): void
 	{
 		$handler = new RequestHandler(new Route(
 			'',
 			'oscarpalmer\Numidium\Test\Fake\Inherited',
-			['oscarpalmer\Numidium\Test\Fake\Inherited']));
+			['oscarpalmer\Numidium\Test\Fake\Inherited'],
+			false),
+		);
 
 		$response = $handler
 			->prepare(new Configuration(), new Container(), null)
@@ -50,8 +65,8 @@ final class RequestHandlerTest extends TestCase
 
 	public function testInheritedClasses(): void
 	{
-		$route_1 = new Route('', 'oscarpalmer\Numidium\Test\Fake\Generic', []);
-		$route_2 = new Route('', 'oscarpalmer\Numidium\Test\Fake\Inherited', ['oscarpalmer\Numidium\Test\Fake\Generic']);
+		$route_1 = new Route('', 'oscarpalmer\Numidium\Test\Fake\Generic', [], false);
+		$route_2 = new Route('', 'oscarpalmer\Numidium\Test\Fake\Inherited', ['oscarpalmer\Numidium\Test\Fake\Generic'], false);
 
 		foreach ([$route_1, $route_2] as $route) {
 			$handler = new RequestHandler($route);
@@ -78,7 +93,8 @@ final class RequestHandlerTest extends TestCase
 				$blob->body = 'Hello, world!';
 
 				return $rhi->handle($req);
-			}]));
+			}],
+			false));
 
 		$response = $handler
 			->prepare(new Configuration(), new Container(), null)
@@ -89,7 +105,7 @@ final class RequestHandlerTest extends TestCase
 
 	public function testMissingClass(): void
 	{
-		$handler = new RequestHandler(new Route('', 'not a real class', []));
+		$handler = new RequestHandler(new Route('', 'not a real class', [], false));
 
 		try {
 			$handler
@@ -102,7 +118,7 @@ final class RequestHandlerTest extends TestCase
 
 	public function testMissingMethod(): void
 	{
-		$handler = new RequestHandler(new Route('', 'oscarpalmer\Numidium\Test\Fake\Generic->blah', []));
+		$handler = new RequestHandler(new Route('', 'oscarpalmer\Numidium\Test\Fake\Generic->blah', [], false));
 
 		try {
 			$handler
@@ -115,8 +131,8 @@ final class RequestHandlerTest extends TestCase
 
 	public function testResponseBody(): void
 	{
-		$handler_scalar = new RequestHandler(new Route('', function () { return 1234; }, []));
-		$handler_error = new RequestHandler(new Route('', function () { return []; }, []));
+		$handler_scalar = new RequestHandler(new Route('', function () { return 1234; }, [], false));
+		$handler_error = new RequestHandler(new Route('', function () { return []; }, [], false));
 
 		$response_scalar = $handler_scalar
 			->prepare(new Configuration(), new Container(), null)
@@ -139,7 +155,7 @@ final class RequestHandlerTest extends TestCase
 
 		$dependencies->add('oscarpalmer\Numidium\Test\Fake\Generic');
 
-		$handler = new RequestHandler(new Route('', 'oscarpalmer\Numidium\Test\Fake\Generic->method', []));
+		$handler = new RequestHandler(new Route('', 'oscarpalmer\Numidium\Test\Fake\Generic->method', [], false));
 
 		$response = $handler
 			->prepare(new Configuration(), $dependencies, null)

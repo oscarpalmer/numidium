@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace oscarpalmer\Numidium\Test;
+namespace oscarpalmer\Numidium\Test\Configuration;
 
 use Exception;
 use LogicException;

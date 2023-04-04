@@ -8,10 +8,12 @@ use League\Container\Container;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7Server\ServerRequestCreator;
 use oscarpalmer\Numidium\Configuration\Configuration;
+use oscarpalmer\Numidium\Configuration\Dependencies;
 use oscarpalmer\Numidium\Exception\Error;
 use oscarpalmer\Numidium\Exception\Response;
 use oscarpalmer\Numidium\Routing\Router;
-use oscarpalmer\Numidium\Routing\Routes;
+use oscarpalmer\Numidium\Routing\Items\Resources;
+use oscarpalmer\Numidium\Routing\Items\Routes;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -66,6 +68,16 @@ final class Numidium implements RequestHandlerInterface
 	}
 
 	/**
+	 * Add resources for responding to HTTP requests
+	 */
+	public function resources(callable $callback): Numidium
+	{
+		call_user_func($callback, new Resources($this->router));
+
+		return $this;
+	}
+
+	/**
 	 * Add routes for responding to HTTP requests
 	 */
 	public function routes(callable $callback): Numidium
@@ -76,7 +88,7 @@ final class Numidium implements RequestHandlerInterface
 	}
 
 	/**
-	 * Create and outout a response based on a HTTP request
+	 * Create and output a response based on a HTTP request
 	 */
 	public function run(?ServerRequestInterface $request = null): void
 	{

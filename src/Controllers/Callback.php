@@ -30,6 +30,6 @@ final class Callback
 
 	public function toRoute(): Route
 	{
-		return new Route('', sprintf('%s->%s', $this->class, $this->method), []);
+		return new Route('', sprintf('%s->%s', $this->class, $this->method), [], false);
 	}
 }

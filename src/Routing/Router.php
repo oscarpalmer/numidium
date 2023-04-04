@@ -55,9 +55,9 @@ final class Router
 	/**
 	 * @param array<callable|string>|callable|string|null $middleware
 	 */
-	public function addRoute(string $method, string $path, callable|string $callback, array|callable|string|null $middleware): void
+	public function addRoute(string $method, string $path, callable|string $callback, array|callable|string|null $middleware, bool $isResource): void
 	{
-		$this->routes[$method][] = new Route($this->getRoutePath($path), $callback, $this->getMiddleware($middleware));
+		$this->routes[$method][] = new Route($this->getRoutePath($path), $callback, $this->getMiddleware($middleware), $isResource);
 	}
 
 	public function getError(int $status, ServerRequestInterface $request, mixed $parameter = null): ResponseInterface

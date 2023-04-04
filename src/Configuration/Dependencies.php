@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace oscarpalmer\Numidium;
+namespace oscarpalmer\Numidium\Configuration;
 
 use League\Container\Argument\Literal\ArrayArgument;
 use League\Container\Argument\Literal\BooleanArgument;

@@ -32,7 +32,7 @@ final class ParametersTest extends TestCase
 
 		$parameters = new Parameters(
 			$request,
-			new Route('/prefix/:a/:b/#a/:c/:a', function () {}, []),
+			new Route('/prefix/:a/:b/#a/:c/:a', function () {}, [], false),
 			['/prefix/a1/b/1234/c/a3', 'a1', 'b', '1234', 'c', 'a3'],
 		);
 

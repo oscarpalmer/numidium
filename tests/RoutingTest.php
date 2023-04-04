@@ -9,8 +9,11 @@ use League\Container\Container;
 use Nyholm\Psr7\Uri;
 use oscarpalmer\Numidium\Configuration\Configuration;
 use oscarpalmer\Numidium\Exception\Response;
+use oscarpalmer\Numidium\Numidium;
+use oscarpalmer\Numidium\Routing\Items\Resources;
+use oscarpalmer\Numidium\Routing\Items\Routes;
 use oscarpalmer\Numidium\Routing\Router;
-use oscarpalmer\Numidium\Routing\Routes;
+use oscarpalmer\Numidium\Test\Fake\Resource;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 
@@ -47,6 +50,43 @@ final class RoutingTest extends TestCase
 			$this->assertSame($callbacks[$index], $item->getCallback());
 			$this->assertSame($itemMiddleware, $item->getMiddleware());
 		}
+	}
+
+	public function testResources(): void
+	{
+		$numidium = new Numidium();
+
+		$numidium->resources(function (Resources $resources) {
+			$resources->add('resource', Resource::class);
+		});
+
+		$router = NumidiumTest::getValue($numidium, 'router');
+
+		/** @var array<array<\oscarpalmer\Numidium\Routing\Item\Route>> */
+		$routes = NumidiumTest::getValue($router, 'routes');
+
+		$resources = 0;
+		$total = 0;
+
+		foreach ($routes as $array) {
+			foreach ($array as $route) {
+				$resources += $route->getIsResource()
+				? 1
+				: 0;
+
+				$total += 1;
+			}
+		}
+
+		$this->assertSame(1, count($routes['DELETE']));
+		$this->assertSame(3, count($routes['GET']));
+		$this->assertSame(3, count($routes['HEAD']));
+		$this->assertSame(0, count($routes['OPTIONS']));
+		$this->assertSame(1, count($routes['PATCH']));
+		$this->assertSame(1, count($routes['POST']));
+		$this->assertSame(0, count($routes['PUT']));
+
+		$this->assertSame($total, $resources);
 	}
 
 	public function testRoutes(): void

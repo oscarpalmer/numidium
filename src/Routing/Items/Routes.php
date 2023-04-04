@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
-namespace oscarpalmer\Numidium\Routing;
+namespace oscarpalmer\Numidium\Routing\Items;
+
+use oscarpalmer\Numidium\Routing\Router;
 
 final class Routes
 {
@@ -19,7 +21,7 @@ final class Routes
 	 */
 	public function delete(string $path, callable|string $callback, array|callable|string|null $middleware = null): Routes
 	{
-		$this->router->addRoute('DELETE', $path, $callback, $middleware);
+		$this->router->addRoute('DELETE', $path, $callback, $middleware, false);
 
 		return $this;
 	}
@@ -47,8 +49,8 @@ final class Routes
 	 */
 	public function get(string $path, callable|string $callback, array|callable|string|null $middleware = null): Routes
 	{
-		$this->router->addRoute('GET', $path, $callback, $middleware);
-		$this->router->addRoute('HEAD', $path, $callback, $middleware);
+		$this->router->addRoute('GET', $path, $callback, $middleware, false);
+		$this->router->addRoute('HEAD', $path, $callback, $middleware, false);
 
 		return $this;
 	}
@@ -62,7 +64,7 @@ final class Routes
 	 */
 	public function head(string $path, callable|string $callback, array|callable|string|null $middleware = null): Routes
 	{
-		$this->router->addRoute('HEAD', $path, $callback, $middleware);
+		$this->router->addRoute('HEAD', $path, $callback, $middleware, false);
 
 		return $this;
 	}
@@ -76,7 +78,7 @@ final class Routes
 	 */
 	public function options(string $path, callable|string $callback, array|callable|string|null $middleware = null): Routes
 	{
-		$this->router->addRoute('OPTIONS', $path, $callback, $middleware);
+		$this->router->addRoute('OPTIONS', $path, $callback, $middleware, false);
 
 		return $this;
 	}
@@ -90,7 +92,7 @@ final class Routes
 	 */
 	public function patch(string $path, callable|string $callback, array|callable|string|null $middleware = null): Routes
 	{
-		$this->router->addRoute('PATCH', $path, $callback, $middleware);
+		$this->router->addRoute('PATCH', $path, $callback, $middleware, false);
 
 		return $this;
 	}
@@ -104,7 +106,7 @@ final class Routes
 	 */
 	public function post(string $path, callable|string $callback, array|callable|string|null $middleware = null): Routes
 	{
-		$this->router->addRoute('POST', $path, $callback, $middleware);
+		$this->router->addRoute('POST', $path, $callback, $middleware, false);
 
 		return $this;
 	}
@@ -118,7 +120,7 @@ final class Routes
 	 */
 	public function put(string $path, callable|string $callback, array|callable|string|null $middleware = null): Routes
 	{
-		$this->router->addRoute('PUT', $path, $callback, $middleware);
+		$this->router->addRoute('PUT', $path, $callback, $middleware, false);
 
 		return $this;
 	}
