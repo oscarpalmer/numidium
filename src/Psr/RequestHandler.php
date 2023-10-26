@@ -8,7 +8,7 @@ use League\Container\Container;
 use LogicException;
 use Nyholm\Psr7\Response;
 use oscarpalmer\Numidium\Configuration\Configuration;
-use oscarpalmer\Numidium\Controllers\Resource;
+use oscarpalmer\Numidium\Controllers\Resource as NumidiumResource;
 use oscarpalmer\Numidium\Routing\Item\Basic;
 use oscarpalmer\Numidium\Routing\Item\Error;
 use oscarpalmer\Numidium\Routing\Item\Route;
@@ -95,11 +95,13 @@ final class RequestHandler implements RequestHandlerInterface
 			// @codeCoverageIgnoreEnd
 		}
 
-		if ($this->item instanceof Route && $this->item->getIsResource() && ! ($instance instanceof Resource)) {
-			$expected = Resource::class;
+		if ($this->item instanceof Route && $this->item->getIsResource() && ! ($instance instanceof NumidiumResource)) {
+			$expected = NumidiumResource::class;
 
 			throw new LogicException("Path matches resource, expected class '{$name}' to inherit '{$expected}'");
-		} else if (is_null($method)) {
+		}
+
+		if (is_null($method)) {
 			$method = $this->getMethod($name, $instance, $isMiddleware);
 		}
 

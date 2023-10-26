@@ -9,7 +9,6 @@ use League\Container\Container;
 use oscarpalmer\Numidium\Configuration\Configuration;
 use oscarpalmer\Numidium\Exception\Response;
 use oscarpalmer\Numidium\Psr\RequestHandler;
-use oscarpalmer\Numidium\Routing\Item\Route;
 use oscarpalmer\Numidium\Routing\Router;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;

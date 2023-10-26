@@ -11,9 +11,9 @@ use oscarpalmer\Numidium\Configuration\Configuration;
 use oscarpalmer\Numidium\Configuration\Dependencies;
 use oscarpalmer\Numidium\Exception\Error;
 use oscarpalmer\Numidium\Exception\Response;
-use oscarpalmer\Numidium\Routing\Router;
 use oscarpalmer\Numidium\Routing\Items\Resources;
 use oscarpalmer\Numidium\Routing\Items\Routes;
+use oscarpalmer\Numidium\Routing\Router;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -21,7 +21,7 @@ use Throwable;
 
 final class Numidium implements RequestHandlerInterface
 {
-	public const VERSION = '0.17.0';
+	public const VERSION = '0.18.0';
 
 	private Configuration $configuration;
 

@@ -60,6 +60,7 @@ final class RoutingTest extends TestCase
 			$resources->add('resource', Resource::class);
 		});
 
+		/** @var Router */
 		$router = NumidiumTest::getValue($numidium, 'router');
 
 		/** @var array<array<\oscarpalmer\Numidium\Routing\Item\Route>> */
@@ -78,12 +79,12 @@ final class RoutingTest extends TestCase
 			}
 		}
 
-		$this->assertSame(1, count($routes['DELETE']));
+		$this->assertSame(0, count($routes['DELETE']));
 		$this->assertSame(3, count($routes['GET']));
 		$this->assertSame(3, count($routes['HEAD']));
 		$this->assertSame(0, count($routes['OPTIONS']));
-		$this->assertSame(1, count($routes['PATCH']));
-		$this->assertSame(1, count($routes['POST']));
+		$this->assertSame(0, count($routes['PATCH']));
+		$this->assertSame(3, count($routes['POST']));
 		$this->assertSame(0, count($routes['PUT']));
 
 		$this->assertSame($total, $resources);

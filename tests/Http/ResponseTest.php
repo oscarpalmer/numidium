@@ -39,7 +39,7 @@ final class ResponseTest extends TestCase
 			$response = call_user_func($callback, $bodies[$status]);
 
 			$this->assertInstanceOf(ResponseInterface::class, $response);
-			$this->assertSame($status, $response instanceof ResponseInterface ? $response->getStatusCode() : -1);
+			$this->assertSame($status, $response->getStatusCode());
 		}
 	}
 
@@ -66,6 +66,7 @@ final class ResponseTest extends TestCase
 	public function testGetBody(): void
 	{
 		try {
+			/** @phpstan-ignore-next-line */
 			Response::ok([]);
 		} catch (Exception $exception) {
 			$this->assertInstanceOf(InvalidArgumentException::class, $exception);
