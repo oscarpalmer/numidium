@@ -6,7 +6,7 @@ namespace oscarpalmer\Numidium\Exception;
 
 use Exception;
 
-final class Error extends Exception
+final class ErrorException extends Exception
 {
 	/**
 	 * @param int $status Status code for error

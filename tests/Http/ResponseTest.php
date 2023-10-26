@@ -7,7 +7,7 @@ namespace oscarpalmer\Numidium\Test\Http;
 use Exception;
 use InvalidArgumentException;
 use Nyholm\Psr7\Stream;
-use oscarpalmer\Numidium\Http\Response;
+use oscarpalmer\Numidium\Http\HttpResponse;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 
@@ -30,7 +30,7 @@ final class ResponseTest extends TestCase
 		];
 
 		foreach ($methods as $status => $method) {
-			$callback = [Response::class, $method];
+			$callback = [HttpResponse::class, $method];
 
 			if (! is_callable($callback)) {
 				continue;
@@ -54,9 +54,9 @@ final class ResponseTest extends TestCase
     "test": 1234
 }';
 
-		$response_1 = Response::json(200, $value);
-		$response_2 = Response::json(200, $value, options: false);
-		$response_3 = Response::json(200, $value, options: true);
+		$response_1 = HttpResponse::json(200, $value);
+		$response_2 = HttpResponse::json(200, $value, options: false);
+		$response_3 = HttpResponse::json(200, $value, options: true);
 
 		$this->assertSame($body_1, (string) $response_1->getBody());
 		$this->assertSame($body_1, (string) $response_2->getBody());
@@ -67,7 +67,7 @@ final class ResponseTest extends TestCase
 	{
 		try {
 			/** @phpstan-ignore-next-line */
-			Response::ok([]);
+			HttpResponse::ok([]);
 		} catch (Exception $exception) {
 			$this->assertInstanceOf(InvalidArgumentException::class, $exception);
 		}

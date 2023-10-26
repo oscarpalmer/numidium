@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace oscarpalmer\Numidium\Controllers;
 
-use oscarpalmer\Numidium\Routing\Item\Route;
+use oscarpalmer\Numidium\Routing\Item\RouteItem;
 
-final class Callback
+final class ControllerCallback
 {
 	private string $class;
 
@@ -28,8 +28,8 @@ final class Callback
 		return $this->method;
 	}
 
-	public function toRoute(): Route
+	public function toRoute(): RouteItem
 	{
-		return new Route('', sprintf('%s->%s', $this->class, $this->method), [], false);
+		return new RouteItem('', sprintf('%s->%s', $this->class, $this->method), [], false);
 	}
 }

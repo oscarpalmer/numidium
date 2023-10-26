@@ -12,7 +12,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 final class Inherited implements MiddlewareInterface, RequestHandlerInterface
 {
-	static int $value = 4321;
+	public static int $value = 4321;
 
 	public function handle(ServerRequestInterface $request): ResponseInterface
 	{

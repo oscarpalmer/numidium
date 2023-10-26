@@ -7,7 +7,7 @@ namespace oscarpalmer\Numidium\Controllers;
 use Exception;
 use League\Container\Container;
 use oscarpalmer\Numidium\Configuration\Configuration;
-use oscarpalmer\Numidium\Exception\Response;
+use oscarpalmer\Numidium\Exception\ResponseException;
 use oscarpalmer\Numidium\Psr\RequestHandler;
 use oscarpalmer\Numidium\Routing\Router;
 use Psr\Http\Message\ResponseInterface;
@@ -29,16 +29,16 @@ final class Manager
 			$handler = new RequestHandler($callback->toRoute());
 			$prepared = $handler->prepare($this->configuration, $this->container, null);
 
-			throw new Response($prepared->handle($request));
+			throw new ResponseException($prepared->handle($request));
 		}
 
 		return $this->router->getError(404, $request);
 	}
 
 	/**
-	 * @param array<Callback> $callbacks
+	 * @param array<ControllerCallback> $callbacks
 	 */
-	private function evaluateCallbacks(array $callbacks, ?Callback &$returned): bool
+	private function evaluateCallbacks(array $callbacks, ?ControllerCallback &$returned): bool
 	{
 		$prefix = $this->configuration->getControllerPrefix();
 
@@ -56,7 +56,7 @@ final class Manager
 				}));
 
 				if (count($matches) === 1) {
-					$returned = new Callback($matches[0], $method);
+					$returned = new ControllerCallback($matches[0], $method);
 
 					return true;
 				}
@@ -68,7 +68,7 @@ final class Manager
 		return false;
 	}
 
-	private function findCallback(string $path, ?Callback &$callback): bool
+	private function findCallback(string $path, ?ControllerCallback &$callback): bool
 	{
 		$unprefixed = ltrim($path, $this->configuration->getPathPrefix());
 		$trimmed = trim($unprefixed, '/');
@@ -83,20 +83,20 @@ final class Manager
 	/**
 	 * @param array<string> $matches
 	 *
-	 * @return array<Callback>
+	 * @return array<ControllerCallback>
 	 */
 	private function getCallbacks(string $original, array $matches): array
 	{
 		if (count($matches) === 3) {
 			return [
-				new Callback($matches[1], $matches[2]),
-				new Callback($original, 'handle'),
+				new ControllerCallback($matches[1], $matches[2]),
+				new ControllerCallback($original, 'handle'),
 			];
 		}
 
 		return [
-			new Callback($original, 'handle'),
-			new Callback($this->configuration->getDefaultController(), $original),
+			new ControllerCallback($original, 'handle'),
+			new ControllerCallback($this->configuration->getDefaultController(), $original),
 		];
 	}
 

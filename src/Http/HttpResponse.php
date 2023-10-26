@@ -9,7 +9,7 @@ use Nyholm\Psr7\Response as Psr7Response;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
-final class Response
+final class HttpResponse
 {
 	private const JSON_OPTIONS = JSON_INVALID_UTF8_SUBSTITUTE
 		| JSON_PRESERVE_ZERO_FRACTION
@@ -57,7 +57,7 @@ final class Response
 	 */
 	public static function json(int $status, mixed $body, array $headers = [], bool|int|null $options = null): ResponseInterface
 	{
-		if (! is_string($body)) {
+		if (!is_string($body)) {
 			$options = is_null($options) || $options === false
 				? self::JSON_OPTIONS
 				: ($options === true
@@ -107,7 +107,7 @@ final class Response
 			return $body;
 		}
 
-		if (! is_scalar($body)) {
+		if (!is_scalar($body)) {
 			throw new InvalidArgumentException('Response body must be scalar, a resource, or inherit \'StreamInterface\'');
 		}
 

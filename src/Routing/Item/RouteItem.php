@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace oscarpalmer\Numidium\Routing\Item;
 
-final class Route extends Basic
+final class RouteItem extends BasicRoutingItem
 {
 	private const EXPRESSION_PATTERNS = ['/\A\/*/', '/\/*\z/', '/\//', '/\./', '/\((.*?)\)/', '/\*/', '/#([\w-]+)/', '/:([\w-]+)/'];
 	private const EXPRESSION_REPLACEMENTS = ['/', '/?', '\/', '\.', '(?:\\1)?', '(.*?)', '(\d+)', '([\w-]+)'];

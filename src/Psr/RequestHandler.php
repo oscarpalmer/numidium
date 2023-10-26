@@ -8,10 +8,10 @@ use League\Container\Container;
 use LogicException;
 use Nyholm\Psr7\Response;
 use oscarpalmer\Numidium\Configuration\Configuration;
-use oscarpalmer\Numidium\Controllers\Resource as NumidiumResource;
-use oscarpalmer\Numidium\Routing\Item\Basic;
-use oscarpalmer\Numidium\Routing\Item\Error;
-use oscarpalmer\Numidium\Routing\Item\Route;
+use oscarpalmer\Numidium\Controllers\ResourceController;
+use oscarpalmer\Numidium\Routing\Item\BasicRoutingItem;
+use oscarpalmer\Numidium\Routing\Item\ErrorItem;
+use oscarpalmer\Numidium\Routing\Item\RouteItem;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
@@ -31,7 +31,7 @@ final class RequestHandler implements RequestHandlerInterface
 
 	private mixed $parameters;
 
-	public function __construct(private readonly Basic $item)
+	public function __construct(private readonly BasicRoutingItem $item)
 	{
 		$this->middleware = $item->getMiddleware();
 	}
@@ -95,8 +95,8 @@ final class RequestHandler implements RequestHandlerInterface
 			// @codeCoverageIgnoreEnd
 		}
 
-		if ($this->item instanceof Route && $this->item->getIsResource() && ! ($instance instanceof NumidiumResource)) {
-			$expected = NumidiumResource::class;
+		if ($this->item instanceof RouteItem && $this->item->getIsResource() && !($instance instanceof ResourceController)) {
+			$expected = ResourceController::class;
 
 			throw new LogicException("Path matches resource, expected class '{$name}' to inherit '{$expected}'");
 		}
@@ -136,7 +136,7 @@ final class RequestHandler implements RequestHandlerInterface
 		$response = $this->createResponse($type, $request, $callback);
 
 		if ($response instanceof ResponseInterface) {
-			if ($this->item instanceof Error) {
+			if ($this->item instanceof ErrorItem) {
 				$response = $response->withStatus($this->item->getStatus());
 			}
 

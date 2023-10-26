@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace oscarpalmer\Numidium\Routing\Item;
 
-final class Error extends Basic
+final class ErrorItem extends BasicRoutingItem
 {
 	/**
 	 * @param array<callable|string> $middleware

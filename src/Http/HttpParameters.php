@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace oscarpalmer\Numidium\Http;
 
-use oscarpalmer\Numidium\Routing\Item\Route;
+use oscarpalmer\Numidium\Routing\Item\RouteItem;
 use Psr\Http\Message\ServerRequestInterface;
 use stdClass;
 
-final class Parameters
+final class HttpParameters
 {
 	private ?string $fragment = null;
 	private stdClass $path;
@@ -17,7 +17,7 @@ final class Parameters
 	/**
 	 * @param array<string> $matches
 	 */
-	public function __construct(ServerRequestInterface $request, Route $route, array $matches)
+	public function __construct(ServerRequestInterface $request, RouteItem $route, array $matches)
 	{
 		$fragment = $request->getUri()->getFragment();
 
@@ -40,7 +40,7 @@ final class Parameters
 	/**
 	 * Matched parameters in URL path
 	 *
-	 * e.g. '/:name' as route path will become 'getPath()->name' to retrieve the matched value in URL
+	 * e.g. `/:name` as route path will become `getPath()->name` to retrieve the matched value in URL
 	 */
 	public function getPath(): stdClass
 	{
@@ -50,7 +50,7 @@ final class Parameters
 	/**
 	 * Query of URL
 	 *
-	 * e.g. '?search=numidium' will become 'getQuery()->search' to retrieve the value 'numidium'
+	 * e.g. `?search=numidium` will become `getQuery()->search` to retrieve the value `numidium`
 	 */
 	public function getQuery(): stdClass
 	{
@@ -62,7 +62,7 @@ final class Parameters
 		$normalizedKey = ltrim($key, ':#');
 		$normalizedValue = $this->getValue($value, false);
 
-		if (! isset($this->path->{$normalizedKey})) {
+		if (!isset($this->path->{$normalizedKey})) {
 			$this->path->{$normalizedKey} = $normalizedValue;
 
 			return;

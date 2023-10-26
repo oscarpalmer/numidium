@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace oscarpalmer\Numidium\Routing\Item;
 
-abstract class Basic
+abstract class BasicRoutingItem
 {
 	/**
 	 * @param array<callable|string> $middleware

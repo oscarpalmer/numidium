@@ -7,9 +7,9 @@ namespace oscarpalmer\Numidium\Test;
 use LogicException;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7Server\ServerRequestCreator;
-use oscarpalmer\Numidium\Configuration\Dependencies;
-use oscarpalmer\Numidium\Exception\Error;
+use oscarpalmer\Numidium\Exception\ErrorException;
 use oscarpalmer\Numidium\Numidium;
+use oscarpalmer\Numidium\Routing\Items\Dependencies;
 use oscarpalmer\Numidium\Routing\Items\Routes;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
@@ -19,7 +19,7 @@ class NumidiumTest extends TestCase
 {
 	public function testConstructor(): void
 	{
-		$numidium = new Numidium;
+		$numidium = new Numidium();
 
 		$this->assertInstanceOf(Numidium::class, $numidium);
 	}
@@ -45,7 +45,7 @@ class NumidiumTest extends TestCase
 		$x = [
 			[404, null, '404 Not Found'],
 			[400, function () {
-				throw new Error(400);
+				throw new ErrorException(400);
 			}, '400 Bad Request'],
 			[200, function () {
 				return 'OK';

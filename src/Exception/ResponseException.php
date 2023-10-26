@@ -7,7 +7,7 @@ namespace oscarpalmer\Numidium\Exception;
 use Exception;
 use Psr\Http\Message\ResponseInterface;
 
-final class Response extends Exception
+final class ResponseException extends Exception
 {
 	public function __construct(private readonly ResponseInterface $response)
 	{

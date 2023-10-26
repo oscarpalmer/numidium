@@ -9,8 +9,8 @@ use League\Container\Container;
 use Nyholm\Psr7\Response as Psr7Response;
 use oscarpalmer\Numidium\Configuration\Configuration;
 use oscarpalmer\Numidium\Psr\RequestHandler;
-use oscarpalmer\Numidium\Routing\Item\Error;
-use oscarpalmer\Numidium\Routing\Item\Route;
+use oscarpalmer\Numidium\Routing\Item\ErrorItem;
+use oscarpalmer\Numidium\Routing\Item\RouteItem;
 use oscarpalmer\Numidium\Test\NumidiumTest;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
@@ -21,7 +21,7 @@ final class RequestHandlerTest extends TestCase
 {
 	public function testBadResource(): void
 	{
-		$handler = new RequestHandler(new Route('', 'oscarpalmer\Numidium\Test\Fake\Inherited', [], true));
+		$handler = new RequestHandler(new RouteItem('', 'oscarpalmer\Numidium\Test\Fake\Inherited', [], true));
 
 		try {
 			$handler
@@ -34,11 +34,13 @@ final class RequestHandlerTest extends TestCase
 
 	public function testDefaultMethods(): void
 	{
-		$handler = new RequestHandler(new Route(
-			'',
-			'oscarpalmer\Numidium\Test\Fake\Inherited',
-			['oscarpalmer\Numidium\Test\Fake\Inherited'],
-			false),
+		$handler = new RequestHandler(
+			new RouteItem(
+				'',
+				'oscarpalmer\Numidium\Test\Fake\Inherited',
+				['oscarpalmer\Numidium\Test\Fake\Inherited'],
+				false
+			),
 		);
 
 		$response = $handler
@@ -50,7 +52,7 @@ final class RequestHandlerTest extends TestCase
 
 	public function testErrorResponse(): void
 	{
-		$handler = new RequestHandler(new Error(404, function () {
+		$handler = new RequestHandler(new ErrorItem(404, function () {
 			return new Psr7Response(200, [], '404 Not Found');
 		}, []));
 
@@ -65,8 +67,8 @@ final class RequestHandlerTest extends TestCase
 
 	public function testInheritedClasses(): void
 	{
-		$route_1 = new Route('', 'oscarpalmer\Numidium\Test\Fake\Generic', [], false);
-		$route_2 = new Route('', 'oscarpalmer\Numidium\Test\Fake\Inherited', ['oscarpalmer\Numidium\Test\Fake\Generic'], false);
+		$route_1 = new RouteItem('', 'oscarpalmer\Numidium\Test\Fake\Generic', [], false);
+		$route_2 = new RouteItem('', 'oscarpalmer\Numidium\Test\Fake\Inherited', ['oscarpalmer\Numidium\Test\Fake\Generic'], false);
 
 		foreach ([$route_1, $route_2] as $route) {
 			$handler = new RequestHandler($route);
@@ -85,7 +87,8 @@ final class RequestHandlerTest extends TestCase
 	{
 		$blob = new stdClass();
 
-		$handler = new RequestHandler(new Route('',
+		$handler = new RequestHandler(new RouteItem(
+			'',
 			function () use ($blob) {
 				return $blob->body ?? '';
 			},
@@ -94,7 +97,8 @@ final class RequestHandlerTest extends TestCase
 
 				return $rhi->handle($req);
 			}],
-			false));
+			false
+		));
 
 		$response = $handler
 			->prepare(new Configuration(), new Container(), null)
@@ -105,7 +109,7 @@ final class RequestHandlerTest extends TestCase
 
 	public function testMissingClass(): void
 	{
-		$handler = new RequestHandler(new Route('', 'not a real class', [], false));
+		$handler = new RequestHandler(new RouteItem('', 'not a real class', [], false));
 
 		try {
 			$handler
@@ -118,7 +122,7 @@ final class RequestHandlerTest extends TestCase
 
 	public function testMissingMethod(): void
 	{
-		$handler = new RequestHandler(new Route('', 'oscarpalmer\Numidium\Test\Fake\Generic->blah', [], false));
+		$handler = new RequestHandler(new RouteItem('', 'oscarpalmer\Numidium\Test\Fake\Generic->blah', [], false));
 
 		try {
 			$handler
@@ -131,8 +135,12 @@ final class RequestHandlerTest extends TestCase
 
 	public function testResponseBody(): void
 	{
-		$handler_scalar = new RequestHandler(new Route('', function () { return 1234; }, [], false));
-		$handler_error = new RequestHandler(new Route('', function () { return []; }, [], false));
+		$handler_scalar = new RequestHandler(new RouteItem('', function () {
+			return 1234;
+		}, [], false));
+		$handler_error = new RequestHandler(new RouteItem('', function () {
+			return [];
+		}, [], false));
 
 		$response_scalar = $handler_scalar
 			->prepare(new Configuration(), new Container(), null)
@@ -155,7 +163,7 @@ final class RequestHandlerTest extends TestCase
 
 		$dependencies->add('oscarpalmer\Numidium\Test\Fake\Generic');
 
-		$handler = new RequestHandler(new Route('', 'oscarpalmer\Numidium\Test\Fake\Generic->method', [], false));
+		$handler = new RequestHandler(new RouteItem('', 'oscarpalmer\Numidium\Test\Fake\Generic->method', [], false));
 
 		$response = $handler
 			->prepare(new Configuration(), $dependencies, null)

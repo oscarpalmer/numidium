@@ -62,7 +62,7 @@ final class ConfigurationTest extends TestCase
 	{
 		$values = [
 			123,
-			new stdClass,
+			new stdClass(),
 			[123 => []],
 			['content-type' => true],
 			['content-type' => [true]],
@@ -107,6 +107,6 @@ final class ConfigurationTest extends TestCase
 
 	public function testUnknown(): void
 	{
-		$this->assertSame('unknown_configuration_value', (new Validator)->validate('unknown_configuration_key', 'unknown_configuration_value'));
+		$this->assertSame('unknown_configuration_value', (new Validator())->validate('unknown_configuration_key', 'unknown_configuration_value'));
 	}
 }

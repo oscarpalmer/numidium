@@ -7,8 +7,8 @@ namespace oscarpalmer\Numidium\Test\Http;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7\Uri;
 use Nyholm\Psr7Server\ServerRequestCreator;
-use oscarpalmer\Numidium\Http\Parameters;
-use oscarpalmer\Numidium\Routing\Item\Route;
+use oscarpalmer\Numidium\Http\HttpParameters;
+use oscarpalmer\Numidium\Routing\Item\RouteItem;
 use PHPUnit\Framework\TestCase;
 
 final class ParametersTest extends TestCase
@@ -30,9 +30,10 @@ final class ParametersTest extends TestCase
 			'c' => ['x', '12.34', 'z'],
 		]);
 
-		$parameters = new Parameters(
+		$parameters = new HttpParameters(
 			$request,
-			new Route('/prefix/:a/:b/#a/:c/:a', function () {}, [], false),
+			new RouteItem('/prefix/:a/:b/#a/:c/:a', function () {
+			}, [], false),
 			['/prefix/a1/b/1234/c/a3', 'a1', 'b', '1234', 'c', 'a3'],
 		);
 

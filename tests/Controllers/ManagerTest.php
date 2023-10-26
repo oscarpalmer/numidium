@@ -9,8 +9,8 @@ use League\Container\Container;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7Server\ServerRequestCreator;
 use oscarpalmer\Numidium\Configuration\Configuration;
-use oscarpalmer\Numidium\Controllers\Callback;
-use oscarpalmer\Numidium\Exception\Response;
+use oscarpalmer\Numidium\Controllers\ControllerCallback;
+use oscarpalmer\Numidium\Exception\ResponseException;
 use oscarpalmer\Numidium\Routing\Router;
 use oscarpalmer\Numidium\Test\NumidiumTest;
 use PHPUnit\Framework\TestCase;
@@ -19,14 +19,14 @@ final class ManagerTest extends TestCase
 {
 	public function testCallback(): void
 	{
-		$callback = new Callback('x', 'y');
+		$callback = new ControllerCallback('x', 'y');
 
 		$this->assertSame('x', $callback->getClass());
 		$this->assertSame('y', $callback->getMethod());
 
 		$route = $callback->toRoute();
 
-		$this->assertInstanceOf('oscarpalmer\Numidium\Routing\Item\Route', $route);
+		$this->assertInstanceOf('oscarpalmer\Numidium\Routing\Item\RouteItem', $route);
 	}
 
 	public function testRespond(): void
@@ -54,7 +54,7 @@ final class ManagerTest extends TestCase
 		try {
 			$manager->respond($request, '/fake/generic/method');
 		} catch (Exception $exception) {
-			$this->assertInstanceOf(Response::class, $exception);
+			$this->assertInstanceOf(ResponseException::class, $exception);
 		}
 	}
 }

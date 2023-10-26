@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace oscarpalmer\Numidium\Test\Configuration;
 
 use League\Container\Container;
-use oscarpalmer\Numidium\Configuration\Dependencies;
+use oscarpalmer\Numidium\Routing\Items\Dependencies;
 use PHPUnit\Framework\TestCase;
 
 final class DependenciesTest extends TestCase

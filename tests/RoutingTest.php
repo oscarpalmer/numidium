@@ -8,7 +8,7 @@ use Exception;
 use League\Container\Container;
 use Nyholm\Psr7\Uri;
 use oscarpalmer\Numidium\Configuration\Configuration;
-use oscarpalmer\Numidium\Exception\Response;
+use oscarpalmer\Numidium\Exception\ResponseException;
 use oscarpalmer\Numidium\Numidium;
 use oscarpalmer\Numidium\Routing\Items\Resources;
 use oscarpalmer\Numidium\Routing\Items\Routes;
@@ -32,7 +32,7 @@ final class RoutingTest extends TestCase
 			$routes->error($status, $callbacks[$index], $middleware[$index]);
 		}
 
-		/** @var array<\oscarpalmer\Numidium\Routing\Item\Error> */
+		/** @var array<\oscarpalmer\Numidium\Routing\Item\ErrorItem> */
 		$values = NumidiumTest::getValue($router, 'errors');
 
 		$this->assertCount(3, $values);
@@ -63,7 +63,7 @@ final class RoutingTest extends TestCase
 		/** @var Router */
 		$router = NumidiumTest::getValue($numidium, 'router');
 
-		/** @var array<array<\oscarpalmer\Numidium\Routing\Item\Route>> */
+		/** @var array<array<\oscarpalmer\Numidium\Routing\Item\RouteItem>> */
 		$routes = NumidiumTest::getValue($router, 'routes');
 
 		$resources = 0;
@@ -103,7 +103,7 @@ final class RoutingTest extends TestCase
 			$routes->{$method}('/a/b/c', $callbacks[$index], $middleware[$index]);
 		}
 
-		/** @var array<array<\oscarpalmer\Numidium\Routing\Item\Route>> */
+		/** @var array<array<\oscarpalmer\Numidium\Routing\Item\RouteItem>> */
 		$values = NumidiumTest::getValue($router, 'routes');
 
 		$this->assertCount(7, $values);
@@ -144,7 +144,7 @@ final class RoutingTest extends TestCase
 		try {
 			$router->run($request);
 		} catch (Exception $exception) {
-			$this->assertInstanceOf(Response::class, $exception);
+			$this->assertInstanceOf(ResponseException::class, $exception);
 		}
 
 		$request = NumidiumTest::getRequest()->withUri(new Uri('http://example.com/nope/'));

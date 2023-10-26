@@ -7,12 +7,12 @@ namespace oscarpalmer\Numidium\Routing;
 use League\Container\Container;
 use oscarpalmer\Numidium\Configuration\Configuration;
 use oscarpalmer\Numidium\Controllers\Manager;
-use oscarpalmer\Numidium\Exception\Response as ExceptionResponse;
-use oscarpalmer\Numidium\Http\Parameters;
-use oscarpalmer\Numidium\Http\Response;
+use oscarpalmer\Numidium\Exception\ResponseException;
+use oscarpalmer\Numidium\Http\HttpParameters;
+use oscarpalmer\Numidium\Http\HttpResponse;
 use oscarpalmer\Numidium\Psr\RequestHandler;
-use oscarpalmer\Numidium\Routing\Item\Error;
-use oscarpalmer\Numidium\Routing\Item\Route;
+use oscarpalmer\Numidium\Routing\Item\ErrorItem;
+use oscarpalmer\Numidium\Routing\Item\RouteItem;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
@@ -22,12 +22,12 @@ final class Router
 	private readonly Manager $controllers;
 
 	/**
-	 * @var array<Error>
+	 * @var array<ErrorItem>
 	 */
 	private array $errors = [];
 
 	/**
-	 * @var array<array<Route>>
+	 * @var array<array<RouteItem>>
 	 */
 	private array $routes = [
 		'DELETE' => [],
@@ -49,7 +49,7 @@ final class Router
 	 */
 	public function addError(int $status, callable|string $callback, array|callable|string|null $middleware): void
 	{
-		$this->errors[$status] = new Error($status, $callback, $this->getMiddleware($middleware));
+		$this->errors[$status] = new ErrorItem($status, $callback, $this->getMiddleware($middleware));
 	}
 
 	/**
@@ -57,7 +57,7 @@ final class Router
 	 */
 	public function addRoute(string $method, string $path, callable|string $callback, array|callable|string|null $middleware, bool $isResource): void
 	{
-		$this->routes[$method][] = new Route($this->getRoutePath($path), $callback, $this->getMiddleware($middleware), $isResource);
+		$this->routes[$method][] = new RouteItem($this->getRoutePath($path), $callback, $this->getMiddleware($middleware), $isResource);
 	}
 
 	public function getError(int $status, ServerRequestInterface $request, mixed $parameter = null): ResponseInterface
@@ -66,7 +66,7 @@ final class Router
 			return (new RequestHandler($this->errors[$status]))->prepare($this->configuration, $this->container, $parameter)->handle($request);
 		}
 
-		$response = Response::create($status, '', $this->configuration->getDefaultHeaders());
+		$response = HttpResponse::create($status, '', $this->configuration->getDefaultHeaders());
 
 		$parameter = $parameter instanceof Throwable
 			? $parameter
@@ -89,11 +89,11 @@ final class Router
 		foreach ($routes as $route) {
 			if (preg_match($route->getExpression(), $path, $matches)) {
 				$handler = new RequestHandler($route);
-				$parameters = new Parameters($request, $route, $matches);
+				$parameters = new HttpParameters($request, $route, $matches);
 
 				$prepared = $handler->prepare($this->configuration, $this->container, $parameters);
 
-				throw new ExceptionResponse($prepared->handle($request));
+				throw new ResponseException($prepared->handle($request));
 			}
 		}
 

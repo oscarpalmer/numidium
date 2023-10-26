@@ -8,9 +8,9 @@ use League\Container\Container;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7Server\ServerRequestCreator;
 use oscarpalmer\Numidium\Configuration\Configuration;
-use oscarpalmer\Numidium\Configuration\Dependencies;
-use oscarpalmer\Numidium\Exception\Error;
-use oscarpalmer\Numidium\Exception\Response;
+use oscarpalmer\Numidium\Exception\ErrorException;
+use oscarpalmer\Numidium\Exception\ResponseException;
+use oscarpalmer\Numidium\Routing\Items\Dependencies;
 use oscarpalmer\Numidium\Routing\Items\Resources;
 use oscarpalmer\Numidium\Routing\Items\Routes;
 use oscarpalmer\Numidium\Routing\Router;
@@ -21,7 +21,7 @@ use Throwable;
 
 final class Numidium implements RequestHandlerInterface
 {
-	public const VERSION = '0.18.0';
+	public const VERSION = '0.19.0';
 
 	private Configuration $configuration;
 
@@ -58,9 +58,9 @@ final class Numidium implements RequestHandlerInterface
 	{
 		try {
 			return $this->router->run($request);
-		} catch (Error $error) {
+		} catch (ErrorException $error) {
 			return $this->router->getError($error->getStatus(), $request, $error->getData());
-		} catch (Response $exception) {
+		} catch (ResponseException $exception) {
 			return $exception->getResponse();
 		} catch (Throwable $throwable) {
 			return $this->router->getError(500, $request, $throwable);
